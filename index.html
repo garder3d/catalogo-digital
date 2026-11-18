@@ -369,6 +369,13 @@ const SECCIONES = {
     { id:'aceituno-mochopo', nombre:'Clicker Gato Aceituno (Mochopo)', tipo:'combo', claves:'clicker aceituno gato mochopo aceituna solidario benjamin', fijos:['b6-aceituno-cola'], tienda:'https://mochopo.com/producto/llavero-clicker-gato-aceituno-benjamin/', tiendaTexto:'Comprar en Mochopo (tienda solidaria) ›',
       desc:'Aceituno, la mascota de Mochopo, asomando de su aceituna con la colita por detrás: la aceituna es la base y el gatito, la tecla. Diseño de Garder3D que se vende solo en la tienda solidaria de Mochopo.',
       bases:{ b:{nombre:'Aceituna', modelo:'b6-aceituno-base'} }, figuras:[ {id:'a', nombre:'Aceituno', color:'#ff8040', base:'b', modelo:'b6-aceituno-aceituno'} ] },
+    { id:'fnf-clicker', nombre:"Clicker Friday Night Funkin'", tipo:'combo', vistaAz:0.25, claves:'clicker friday night funkin fnf boyfriend flechas ritmo',
+      desc:'Boyfriend con las cuatro flechas del juego, cada una con su propio pulsador: izquierda, abajo, arriba y derecha.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/friday-night-funkin-boyfriend-clicker-pulsador-antiestres'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      fijos:['b7-fnf-abajo','b7-fnf-arriba','b7-fnf-derecha'], bases:{ b:{nombre:'Boyfriend y cajas', modelo:'b7-fnf-base'} },
+      figuras:[ {id:'f', nombre:'Flechas', base:'b', modelo:'b7-fnf-izquierda'} ] },
+    { id:'fosil-clicker', nombre:'Clicker Fósil (Animal Crossing)', tipo:'combo', claves:'clicker animal crossing fosil fossil marca excavar',
+      desc:'La marca de un fósil enterrado de Animal Crossing: el suelo azul es la base y la marca, la tecla.', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ b:{nombre:'Suelo', modelo:'b7-fosil-base'} }, figuras:[ {id:'m', nombre:'Marca del fósil', base:'b', modelo:'b7-fosil-marca'} ] },
     { id:'tails-doll', nombre:'Tails Doll', tipo:'3d', modelo:'b6-tails-doll', claves:'figura sonic tails doll creepy',
       desc:'Figura del inquietante Tails Doll de Sonic R.', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']] },
     { id:'pokewalker-clicker', nombre:'Pokéwalker Clicker', tipo:'kit', nPant:72, claves:'clicker pokewalker pokemon pantallas caras podometro',
@@ -512,7 +519,10 @@ function init3D(){
       camera.position.lerpVectors(anim.p0, anim.p1, e); controls.target.lerpVectors(anim.c0, anim.c1, e);
       if (t >= 1) anim = null;
     }
-    controls.update(); renderer.render(scene, camera);
+    controls.update();
+    const dist = camera.position.distanceTo(controls.target), nr = Math.max(0.05, dist * 0.02);   // plano cercano según la distancia: evita parpadeos en calcas finas
+    if (Math.abs(nr - camera.near) > nr * 0.1) { camera.near = nr; camera.far = Math.max(5000, dist * 50); camera.updateProjectionMatrix(); }
+    renderer.render(scene, camera);
   });
 }
 function resize(){
