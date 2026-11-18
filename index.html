@@ -102,6 +102,13 @@
   .shop{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 16px;border-radius:14px;background:var(--tkdark);color:#fff;text-decoration:none;font-weight:500}
   .item .meta{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-top:2px}
   .item .meta em{font-style:normal;font-weight:600;color:var(--tkgreen);font-size:.92rem;white-space:nowrap}
+  .aviso3d{position:fixed;z-index:50;left:50%;bottom:18px;transform:translate(-50%,20px);width:min(92vw,520px);display:flex;gap:12px;align-items:flex-start;
+    background:var(--ink);color:#fff;border-radius:18px;padding:14px 14px 14px 16px;box-shadow:0 12px 34px rgba(43,36,51,.28);opacity:0;transition:opacity .35s,transform .35s}
+  .aviso3d.on{opacity:1;transform:translate(-50%,0)}
+  .aviso3d .ic{font-size:1.3rem;line-height:1.2}
+  .aviso3d p{flex:1;font-size:.92rem;line-height:1.4;color:rgba(255,255,255,.88)}
+  .aviso3d p b{display:block;color:#fff;font-weight:600;margin-bottom:2px}
+  .aviso3d button{background:none;border:0;color:#fff;font-size:1.4rem;line-height:1;opacity:.75;padding:0 2px;cursor:pointer}
   .vcount.izq{left:8px;right:auto;background:#7a4bd6}
   .vcount{position:absolute;top:8px;right:8px;font-size:.7rem;font-weight:600;background:var(--tkgreen);color:#fff;padding:3px 8px;border-radius:99px}
   .screens{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
@@ -161,6 +168,7 @@
 </section>
 
 <!-- ============ LISTADOS ============ -->
+<div class="aviso3d" id="aviso3d" role="status" hidden><span class="ic">✨</span><p><b>Vista previa simplificada</b>Los modelos 3D de la web tienen menos detalle para que carguen rápido en cualquier móvil. Las piezas impresas se ven mucho mejor en persona.</p><button id="aviso3dX" aria-label="Cerrar aviso">×</button></div>
 <section class="view" id="lista">
   <div class="bar"><button class="back" data-go="">‹</button><h2 id="listaTitulo"></h2><canvas id="listaLogo"></canvas></div>
   <div class="search"><label>
@@ -448,9 +456,16 @@ function pinta(canvas, src, max=420, caja=false){  // las imágenes se dibujan e
 
 /* ---------- listados ---------- */
 let listaKey = null;
+let avisado3D = false, avisoT = null;
+function avisa3D(){   // aviso breve, una vez por visita, al entrar en Impresión 3D
+  if (avisado3D) return; avisado3D = true;
+  const a = $('aviso3d'); a.hidden = false; requestAnimationFrame(() => a.classList.add('on'));
+  const cierra = () => { clearTimeout(avisoT); a.classList.remove('on'); setTimeout(() => a.hidden = true, 400); };
+  $('aviso3dX').onclick = cierra; avisoT = setTimeout(cierra, 7000);
+}
 function renderLista(key){
   const s = SECCIONES[key];
-  if (listaKey !== key) { $('buscar').value = ''; listaKey = key; scrollLista[key] = 0; }
+  if (listaKey !== key) { $('buscar').value = ''; listaKey = key; scrollLista[key] = 0; if (key === 'impresion-3d') avisa3D(); }
   $('listaTitulo').textContent = s.titulo; pinta($('listaLogo'), A[s.logo], 120);
   $('buscar').placeholder = 'Buscar en ' + s.titulo.toLowerCase() + '…';
   show('lista');
