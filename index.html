@@ -193,7 +193,7 @@
     <div class="swatches" id="vColores"></div>
     <div id="vVarBox" hidden><div class="vlabel" id="vVarLabel">Variantes</div><div class="chips" id="vChips"></div></div>
     <div id="kitBox" hidden>
-      <div class="vlabel">Dispositivo</div><div class="opt3d" id="kitBases"></div>
+      <div class="vlabel" id="kitBLabel">Dispositivo</div><div class="opt3d" id="kitBases"></div>
       <div class="vlabel" id="kitPLabel">Pantalla</div>
       <div class="opt3d" id="kitGrupos" style="margin-bottom:10px"></div>
       <div class="screens" id="kitPantallas"></div>
@@ -377,6 +377,10 @@ const SECCIONES = {
     { id:'digivice-clicker', nombre:'Digivice Clicker', tipo:'kit', nPant:18, claves:'clicker digivice digimon llavero pantallas sprites',
       desc:'Llavero clicker de Digivice: la pantalla redonda es la tecla. Elige el sprite de Digimon.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/llavero-digivice-fidget-clicker-digimon'],['Patreon','https://www.patreon.com/cw/Garder3D']],
       tinteDe:'#ff8040', bases:[ {modelo:'digivice-base', nombre:'Naranja', color:'#ff8040'}, {modelo:'digivice-base', nombre:'Azul', tinte:'#2f6fe0'}, {modelo:'digivice-base', nombre:'Rosa', tinte:'#ff7eb6'}, {modelo:'digivice-base', nombre:'Verde', tinte:'#3dbe4a'}, {modelo:'digivice-base', nombre:'Celeste', tinte:'#6ccff6'}, {modelo:'digivice-base', nombre:'Blanco', tinte:'#f2f2f2'}, {modelo:'digivice-base', nombre:'Morado', tinte:'#8e5bd9'} ], grupos:['digi'] },
+    { id:'cartucho-nfc', nombre:'Cartucho NFC', tipo:'kit', nPant:76, datos:'cartuchos-datos.js', etiquetaB:'Cartucho', etiquetaP:'Pegatinas', claves:'llavero cartucho nfc game boy color advance gbc gba nds ds 3ds pokemon pegatina',
+      desc:'Llavero con forma de cartucho y un chip NFC grabable dentro. Elige la consola y la pegatina: en algunos juegos el cartucho cambia de color, como los originales.',
+      bases:[ {modelo:'nfc-gbc', nombre:'Game Boy Color'}, {modelo:'nfc-gba', nombre:'Game Boy Advance'}, {modelo:'nfc-nds', nombre:'Nintendo DS'} ],
+      grupos:['gbc-poke','gbc-otros','gba-poke','gba-otros','nds-poke','nds-otros'] },
     { id:'psyduck', nombre:'Psyduck Clicker', tipo:'combo', tienda:'https://thecraftyteckel.com/product/clicker-psyduck-pokemon', claves:'clicker pokemon psyduck flotador verano summer',
       desc:'Psyduck de verano con su flotador: el flotador es la base y Psyduck, la tecla. Esculpido a mano en Nomad Sculpt.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/summer-psyduck-clicker-figure-pokemon'],['Patreon','https://www.patreon.com/cw/Garder3D']],
       bases:{ f:{nombre:'Flotador', modelo:'b6-psyduck-base'} }, figuras:[ {id:'p', nombre:'Psyduck', base:'f', modelo:'b6-psyduck-psyduck'} ] },
@@ -466,7 +470,7 @@ function pintaGrid(){
     if (it.tipo==='3d' || it.tipo==='kit' || it.tipo==='pikmin' || it.tipo==='combo') {
       b.querySelector('.pic').insertAdjacentHTML('beforeend','<span class="badge3d">3D</span>');
       const nv = it.tipo === 'kit' ? (it.nPant || 0) : (it.figuras || []).length;
-      if (nv > 1) b.querySelector('.pic').insertAdjacentHTML('beforeend', `<span class="vcount izq">${nv} ${it.tipo === 'kit' ? 'pantallas' : 'variantes'}</span>`);
+      if (nv > 1) b.querySelector('.pic').insertAdjacentHTML('beforeend', `<span class="vcount izq">${nv} ${it.tipo === 'kit' ? (it.etiquetaP || 'pantallas').toLowerCase() : 'variantes'}</span>`);
     }
     else if (it.variantes.length > 1) b.querySelector('.pic').insertAdjacentHTML('beforeend',`<span class="vcount">${it.variantes.length} variantes</span>`);
     b.querySelector('b').textContent = it.nombre;
@@ -574,7 +578,7 @@ function vistaGeneral(){
   const d = size.length()/2 / Math.sin(THREE.MathUtils.degToRad(16));
   kitFoco = false; controls.autoRotate = true;
   moverCamara(new THREE.Vector3(c.x + d*.35, c.y + d*.12, c.z + d*.93), c);
-  $('focusBtn').textContent = '🔍 Ver la pantalla';
+  $('focusBtn').textContent = txtVer();
 }
 function vistaPantalla(){
   const b = datosBase(), [hx, hy] = b.hueco, top = (b.rimZ ?? b.huecoTop) + (b.saliente ?? SALIENTE);
@@ -595,7 +599,7 @@ function pintaTira(it){
 }
 function etiquetaPantalla(){
   const g = window.NG.grupos[kitEstado.grupo], j = g.ids.indexOf(kitEstado.pant);
-  $('kitPLabel').textContent = 'Pantallas · ' + g.nombre + (j >= 0 ? ' · ' + (j+1) + ' de ' + g.ids.length : ' · ' + g.ids.length);
+  $('kitPLabel').textContent = (kitActual.etiquetaP || 'Pantallas') + ' · ' + g.nombre + (j >= 0 ? ' · ' + (j+1) + ' de ' + g.ids.length : ' · ' + g.ids.length);
 }
 async function showKit(it){
   init3D(); resize();
@@ -604,33 +608,53 @@ async function showKit(it){
   $('loading').hidden = false; $('loading').textContent = 'Cargando modelo…';
   try {
     if (!window.NG) await loadScript('ngotchi-datos.js');
+    if (it.datos && !datosCargados[it.datos]) { await loadScript(it.datos); datosCargados[it.datos] = true; }
     if (my !== token) return;
     kitActual = it;
-    kitEstado = kitMem[it.id] = kitMem[it.id] || { base: it.bases[0].modelo, tinte: it.bases[0].tinte || null, grupo: it.grupos[0], pant: window.NG.grupos[it.grupos[0]].ids[0] };
+    kitEstado = kitMem[it.id] = kitMem[it.id] || { base: it.bases[0].modelo, tinte: it.bases[0].tinte || null, grupo: gruposDe(it, it.bases[0].modelo)[0], pant: null };
+    if (!kitEstado.pant) kitEstado.pant = window.NG.grupos[kitEstado.grupo].ids[0];
+    $('kitBLabel').textContent = it.etiquetaB || 'Dispositivo';
     $('kitBox').hidden = false;
     $('kitBases').innerHTML = '';
     it.bases.forEach(bs => { const ch = document.createElement('button'); ch.className = 'chip' + (bs.modelo === kitEstado.base && (bs.tinte || null) === (kitEstado.tinte || null) ? ' on' : '');
       if (bs.color || bs.tinte) { const d = document.createElement('span'); d.className = 'dot'; d.style.background = bs.tinte || bs.color; ch.appendChild(d); }
       ch.appendChild(document.createTextNode(bs.nombre));
-      ch.onclick = () => { kitEstado.base = bs.modelo; kitEstado.tinte = bs.tinte || null; [...$('kitBases').children].forEach(x => x.classList.toggle('on', x === ch)); montaKit(false); }; $('kitBases').appendChild(ch); });
-    $('kitGrupos').innerHTML = ''; $('kitGrupos').hidden = it.grupos.length < 2;
-    it.grupos.forEach(gid => { const ch = document.createElement('button'); ch.className = 'chip' + (gid === kitEstado.grupo ? ' on' : '');
-      ch.textContent = window.NG.grupos[gid].nombre + ' (' + window.NG.grupos[gid].ids.length + ')';
-      ch.onclick = () => { kitEstado.grupo = gid; [...$('kitGrupos').children].forEach(x => x.classList.toggle('on', x === ch)); pintaTira(it); $('kitPantallas').scrollLeft = 0; }; $('kitGrupos').appendChild(ch); });
+      ch.onclick = () => { kitEstado.base = bs.modelo; kitEstado.tinte = bs.tinte || null; [...$('kitBases').children].forEach(x => x.classList.toggle('on', x === ch));
+        const gs = gruposDe(it, bs.modelo);
+        if (!gs.includes(kitEstado.grupo)) { kitEstado.grupo = gs[0]; kitEstado.pant = window.NG.grupos[gs[0]].ids[0]; }
+        pintaGrupos(it); pintaTira(it); montaKit(false); }; $('kitBases').appendChild(ch); });
+    pintaGrupos(it);
     pintaTira(it);
     $('focusBtn').hidden = false;
     $('focusBtn').onclick = () => kitFoco ? vistaGeneral() : vistaPantalla();
     await montaKit(true, my);
   } catch(e) { console.error(e); if (my === token) $('loading').textContent = 'No se pudo cargar el modelo'; }
 }
+const datosCargados = {};
+const gruposDe = (it, base) => it.grupos.filter(g => !window.NG.grupos[g].base || window.NG.grupos[g].base === base);
+const txtVer = () => '🔍 Ver la ' + (kitActual && kitActual.etiquetaP ? kitActual.etiquetaP.toLowerCase().replace(/s$/, '') : 'pantalla');
+function pintaGrupos(it){
+    const gs = gruposDe(it, kitEstado.base);
+    $('kitGrupos').innerHTML = ''; $('kitGrupos').hidden = gs.length < 2;
+    gs.forEach(gid => { const ch = document.createElement('button'); ch.className = 'chip' + (gid === kitEstado.grupo ? ' on' : '');
+      ch.textContent = window.NG.grupos[gid].nombre + ' (' + window.NG.grupos[gid].ids.length + ')';
+      ch.onclick = () => { kitEstado.grupo = gid; [...$('kitGrupos').children].forEach(x => x.classList.toggle('on', x === ch)); pintaTira(it); $('kitPantallas').scrollLeft = 0; }; $('kitGrupos').appendChild(ch); });
+}
 let kitGrupo = null, kitPantalla = null;
-function tiñe(obj, de, a){   // cambia un color de la base (p. ej. el naranja del Digivice) por el elegido
-  if (!de) return;
-  const ref = new THREE.Color(de);
+let kitBase = null;
+function tiñe(obj, de, a){   // cambia un color de la base (naranja del Digivice, gris de los cartuchos) por el elegido; '*' = acabado brillante
+  if (!de || !obj) return;
+  const ref = new THREE.Color(de), brillo = !!a && a.endsWith('*'), col = a ? new THREE.Color(a.replace('*', '')) : null;
   obj.traverse(o => { if (!o.isMesh) return;
-    if (!o.userData.c0) { o.material = o.material.clone(); o.userData.c0 = o.material.color.clone(); }
-    const c0 = o.userData.c0, d = Math.abs(c0.r - ref.r) + Math.abs(c0.g - ref.g) + Math.abs(c0.b - ref.b);
-    o.material.color.copy(a && d < 0.06 ? new THREE.Color(a) : c0); });
+    if (!o.userData.c0) { o.material = o.material.clone(); o.userData.c0 = o.material.color.clone(); o.userData.r0 = o.material.roughness; o.userData.m0 = o.material.metalness; }
+    const c0 = o.userData.c0, d = Math.abs(c0.r - ref.r) + Math.abs(c0.g - ref.g) + Math.abs(c0.b - ref.b), hit = col && d < 0.06;
+    o.material.color.copy(hit ? col : c0);
+    o.material.roughness = hit && brillo ? 0.22 : o.userData.r0; o.material.metalness = hit && brillo ? 0.45 : o.userData.m0; });
+}
+function aplicaTinte(){
+  const db = datosBase();
+  if (db && db.gris) tiñe(kitBase, db.gris, (window.NG.tinte || {})[kitEstado.pant]);
+  else tiñe(kitBase, kitActual && kitActual.tinteDe, kitEstado.tinte);
 }
 function ponPantalla(){
   if (!kitPantalla) return;
@@ -638,13 +662,14 @@ function ponPantalla(){
   kitPantalla.position.set(b.hueco[0], b.hueco[1], (b.rimZ ?? b.huecoTop) + (b.saliente ?? SALIENTE) - sz[2]/2);
   const map = texPantalla(kitEstado.pant);
   kitPantalla.traverse(o => { if (o.isMesh) { o.material.map = map; o.material.color.set(0xffffff); o.material.needsUpdate = true; } });
+  aplicaTinte();
 }
 async function montaKit(primera, my = token){
   $('loading').hidden = false;
   const pid = plantillaId();
   const [base, plant] = await Promise.all([getModel(kitEstado.base), getModel(pid)]);
   if (my !== token) return;
-  tiñe(base, kitActual && kitActual.tinteDe, kitEstado.tinte);
+  kitBase = base;
   if (!kitGrupo) kitGrupo = new THREE.Group();
   kitGrupo.clear();
   if (kitPantalla && kitPantalla.userData.pid !== pid) kitPantalla = null;
@@ -657,7 +682,7 @@ async function montaKit(primera, my = token){
   controls.minDistance = 25; controls.maxDistance = size.length()*4;
   if (primera) { const d = size.length()/2 / Math.sin(THREE.MathUtils.degToRad(16));
     controls.target.copy(c); camera.position.set(c.x + d*.35, c.y + d*.12, c.z + d*.93); kitFoco = false; rotarLuego(); controls.update();
-    $('focusBtn').textContent = '🔍 Ver la pantalla'; }
+    $('focusBtn').textContent = txtVer(); }
   else if (kitFoco) vistaPantalla(); else vistaGeneral();
   $('loading').hidden = true;
 }
