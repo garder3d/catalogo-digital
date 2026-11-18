@@ -93,7 +93,7 @@
   .swatches span{width:22px;height:22px;border-radius:50%;border:2px solid var(--line)}
   .swatches em{font-style:normal;font-size:.82rem;color:var(--soft);margin-left:4px}
   .photo{position:relative;flex:1;display:grid;place-items:center;padding:16px 64px;min-height:300px;height:52vh}
-  .photo canvas{width:100%;height:100%;filter:drop-shadow(0 14px 22px rgba(43,36,51,.18))}
+  .photo canvas{position:absolute;left:64px;right:64px;top:16px;bottom:16px;width:calc(100% - 128px);height:calc(100% - 32px);filter:drop-shadow(0 14px 22px rgba(43,36,51,.18))}
   .price{font-size:1.35rem;font-weight:600;color:var(--tkgreen);margin:2px 0 8px}
   .vlabel{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--soft);margin:14px 0 8px}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
@@ -102,6 +102,7 @@
   .shop{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 16px;border-radius:14px;background:var(--tkdark);color:#fff;text-decoration:none;font-weight:500}
   .item .meta{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-top:2px}
   .item .meta em{font-style:normal;font-weight:600;color:var(--tkgreen);font-size:.92rem;white-space:nowrap}
+  .vcount.izq{left:8px;right:auto;background:#7a4bd6}
   .vcount{position:absolute;top:8px;right:8px;font-size:.7rem;font-weight:600;background:var(--tkgreen);color:#fff;padding:3px 8px;border-radius:99px}
   .screens{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
   .scr{flex:none;width:62px;height:62px;border-radius:12px;border:3px solid var(--line);background:#fff;padding:3px;scroll-snap-align:start}
@@ -222,15 +223,15 @@ const SECCIONES = {
     { id:'sans',    nombre:'Figura Sans', tipo:'3d', desc:'Fanart de Sans (Undertale) esculpido a mano en Nomad Sculpt e impreso a cuatro colores.', colores:['#FFFFFF','#0056B8','#8080FF','#000000'] },
     { id:'zoovik',  nombre:'Zoovik', descargas:[['MakerWorld','https://makerworld.com/es/models/3289167'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/zoovik-garder3d-creations-garder3d']],      tipo:'3d', desc:'Personaje original creado por Garder3D, esculpido a mano en Nomad Sculpt e impreso en color.', colores:['#FF9D6F','#000001'] },
     { id:'bloovik', nombre:'Bloovik',     tipo:'3d', desc:'La variante más graciosa de Zoovik, en versión gallina. Diseño original de Garder3D.', colores:['#FF9016','#000000'] },
-    { id:'evangotchi', tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-evangotchi-clicker-evangelion'],['Patreon','https://www.patreon.com/cw/Garder3D']], nombre:'Evangotchi', tipo:'kit', desc:'N-Gotchi edición Evangelion. Elige la unidad EVA y la pantalla: la pantalla es la tecla que hace click.',
+    { id:'evangotchi', tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-evangotchi-clicker-evangelion'],['Patreon','https://www.patreon.com/cw/Garder3D']], nombre:'Evangotchi', tipo:'kit', nPant:26, desc:'N-Gotchi edición Evangelion. Elige la unidad EVA y la pantalla: la pantalla es la tecla que hace click.',
       bases:[ {modelo:'eva-base-00', nombre:'EVA-00'}, {modelo:'eva-base-01', nombre:'EVA-01'}, {modelo:'eva-base-02', nombre:'EVA-02'} ], grupos:['eva'] },
-    { id:'n-gotchi-original', descargas:[['MakerWorld','https://makerworld.com/es/models/2660440'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/n-gotchi-mascota-virtual-pulsador-clicker-antiestres'],['MakerWorld','https://makerworld.com/es/models/2982991'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi Original', tipo:'kit', desc:'El primer N-Gotchi, el modelo base de la gama. Clicker estilo Tamagotchi con pulsador mecánico: la pantalla es la tecla.',
+    { id:'n-gotchi-original', descargas:[['MakerWorld','https://makerworld.com/es/models/2660440'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/n-gotchi-mascota-virtual-pulsador-clicker-antiestres'],['MakerWorld','https://makerworld.com/es/models/2982991'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi Original', tipo:'kit', nPant:74, desc:'El primer N-Gotchi, el modelo base de la gama. Clicker estilo Tamagotchi con pulsador mecánico: la pantalla es la tecla.',
       bases:[ {modelo:'ng-original', nombre:'Original'} ], grupos:['garder3d','retro','pokemon'] },
-    { id:'n-gotchi-v2', descargas:[['MakerWorld','https://makerworld.com/es/models/2850735'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-pokemon-n-gotchi-v2-virtual-pet-retro'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi V2', tipo:'kit', desc:'El N-Gotchi rediseñado, en tres versiones. Elige la carcasa y la pantalla que más te guste.',
+    { id:'n-gotchi-v2', descargas:[['MakerWorld','https://makerworld.com/es/models/2850735'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-pokemon-n-gotchi-v2-virtual-pet-retro'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi V2', tipo:'kit', nPant:74, desc:'El N-Gotchi rediseñado, en tres versiones. Elige la carcasa y la pantalla que más te guste.',
       bases:[ {modelo:'ng-v2-calavera', nombre:'Calavera'}, {modelo:'ng-v2-corazon', nombre:'Corazón'}, {modelo:'ng-v2-estrella', nombre:'Estrella'} ], grupos:['garder3d','retro','pokemon'] },
-    { id:'n-gotchi-pokemon', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-pikachu-peakychu-edition-pokemon-pokopia'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi Pokémon', tipo:'kit', desc:'N-Gotchi en versión Pokémon. Elige el modelo y la pantalla.',
+    { id:'n-gotchi-pokemon', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-pikachu-peakychu-edition-pokemon-pokopia'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi Pokémon', tipo:'kit', nPant:74, desc:'N-Gotchi en versión Pokémon. Elige el modelo y la pantalla.',
       bases:[ {modelo:'ng-poke-pikachu', nombre:'Pikachu'}, {modelo:'ng-poke-palidachu', nombre:'Palidachu'} ], grupos:['pokemon','retro','garder3d'] },
-    { id:'kittygotchi', tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-kittygotchi-clicker-hello-kitty'],['Patreon','https://www.patreon.com/cw/Garder3D']], nombre:'Kittygotchi', tipo:'kit', desc:'N-Gotchi edición Hello Kitty y Kuromi. Elige el gatito y la pantalla.',
+    { id:'kittygotchi', tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-kittygotchi-clicker-hello-kitty'],['Patreon','https://www.patreon.com/cw/Garder3D']], nombre:'Kittygotchi', tipo:'kit', nPant:11, desc:'N-Gotchi edición Hello Kitty y Kuromi. Elige el gatito y la pantalla.',
       bases:[ {modelo:'ng-kitty-pure', nombre:'Pure Cat'}, {modelo:'ng-kitty-evil', nombre:'Evil Cat'} ], grupos:['kitty'] },
     { id:'pikmin-clicker', nombre:'Pikmin Clicker', tipo:'pikmin', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/clicker-pikmin',
       desc:'Mi clicker más famoso: el Pikmin es la tecla. Todos comparten maceta, salvo las ediciones especiales de Halloween (calabaza) y Navidad (regalo).',
@@ -370,12 +371,12 @@ const SECCIONES = {
       bases:{ b:{nombre:'Aceituna', modelo:'b6-aceituno-base'} }, figuras:[ {id:'a', nombre:'Aceituno', color:'#ff8040', base:'b', modelo:'b6-aceituno-aceituno'} ] },
     { id:'tails-doll', nombre:'Tails Doll', tipo:'3d', modelo:'b6-tails-doll', claves:'figura sonic tails doll creepy',
       desc:'Figura del inquietante Tails Doll de Sonic R.', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']] },
-    { id:'pokewalker-clicker', nombre:'Pokéwalker Clicker', tipo:'kit', claves:'clicker pokewalker pokemon pantallas caras podometro',
+    { id:'pokewalker-clicker', nombre:'Pokéwalker Clicker', tipo:'kit', nPant:72, claves:'clicker pokewalker pokemon pantallas caras podometro',
       desc:'El Pokéwalker hecho clicker: la pantalla es la tecla. Elige entre más de 70 pantallas con caras de Pokémon.', descargas:[['MakerWorld','https://makerworld.com/es/models/2964216'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokewalker-clicker-pulsador-antiestres'],['Patreon','https://www.patreon.com/cw/Garder3D']],
       bases:[ {modelo:'pokewalker-base', nombre:'Pokéwalker'} ], grupos:['pw-t1','pw-t2'] },
-    { id:'digivice-clicker', nombre:'Digivice Clicker', tipo:'kit', claves:'clicker digivice digimon llavero pantallas sprites',
+    { id:'digivice-clicker', nombre:'Digivice Clicker', tipo:'kit', nPant:18, claves:'clicker digivice digimon llavero pantallas sprites',
       desc:'Llavero clicker de Digivice: la pantalla redonda es la tecla. Elige el sprite de Digimon.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/llavero-digivice-fidget-clicker-digimon'],['Patreon','https://www.patreon.com/cw/Garder3D']],
-      bases:[ {modelo:'digivice-base', nombre:'Digivice'} ], grupos:['digi'] },
+      tinteDe:'#ff8040', bases:[ {modelo:'digivice-base', nombre:'Naranja', color:'#ff8040'}, {modelo:'digivice-base', nombre:'Azul', tinte:'#2f6fe0'}, {modelo:'digivice-base', nombre:'Rosa', tinte:'#ff7eb6'}, {modelo:'digivice-base', nombre:'Verde', tinte:'#3dbe4a'}, {modelo:'digivice-base', nombre:'Celeste', tinte:'#6ccff6'}, {modelo:'digivice-base', nombre:'Blanco', tinte:'#f2f2f2'}, {modelo:'digivice-base', nombre:'Morado', tinte:'#8e5bd9'} ], grupos:['digi'] },
     { id:'psyduck', nombre:'Psyduck Clicker', tipo:'combo', tienda:'https://thecraftyteckel.com/product/clicker-psyduck-pokemon', claves:'clicker pokemon psyduck flotador verano summer',
       desc:'Psyduck de verano con su flotador: el flotador es la base y Psyduck, la tecla. Esculpido a mano en Nomad Sculpt.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/summer-psyduck-clicker-figure-pokemon'],['Patreon','https://www.patreon.com/cw/Garder3D']],
       bases:{ f:{nombre:'Flotador', modelo:'b6-psyduck-base'} }, figuras:[ {id:'p', nombre:'Psyduck', base:'f', modelo:'b6-psyduck-psyduck'} ] },
@@ -462,7 +463,11 @@ function pintaGrid(){
     b.className = 'item'; b.style.setProperty('--halo', s.halo);
     b.innerHTML = `<div class="pic"><canvas></canvas></div><b></b><div class="meta"><small></small><em></em></div>`;
     const src = fotoDe(it); if (src) requestAnimationFrame(() => pinta(b.querySelector('canvas'), src, 0, true));
-    if (it.tipo==='3d' || it.tipo==='kit' || it.tipo==='pikmin' || it.tipo==='combo') b.querySelector('.pic').insertAdjacentHTML('beforeend','<span class="badge3d">3D</span>');
+    if (it.tipo==='3d' || it.tipo==='kit' || it.tipo==='pikmin' || it.tipo==='combo') {
+      b.querySelector('.pic').insertAdjacentHTML('beforeend','<span class="badge3d">3D</span>');
+      const nv = it.tipo === 'kit' ? (it.nPant || 0) : (it.figuras || []).length;
+      if (nv > 1) b.querySelector('.pic').insertAdjacentHTML('beforeend', `<span class="vcount izq">${nv} ${it.tipo === 'kit' ? 'pantallas' : 'variantes'}</span>`);
+    }
     else if (it.variantes.length > 1) b.querySelector('.pic').insertAdjacentHTML('beforeend',`<span class="vcount">${it.variantes.length} variantes</span>`);
     b.querySelector('b').textContent = it.nombre;
     b.querySelector('small').textContent = (it.tipo==='kit' || it.tipo==='pikmin' || (it.tipo==='combo' && it.figuras.length > 1)) ? 'Personalízalo en 3D' : (it.tipo==='3d' || it.tipo==='combo') ? 'Toca para verlo en 3D' : (it.variantes.length > 1 ? 'Elige variante' : 'Toca para verlo');
@@ -600,11 +605,13 @@ async function showKit(it){
     if (!window.NG) await loadScript('ngotchi-datos.js');
     if (my !== token) return;
     kitActual = it;
-    kitEstado = kitMem[it.id] = kitMem[it.id] || { base: it.bases[0].modelo, grupo: it.grupos[0], pant: window.NG.grupos[it.grupos[0]].ids[0] };
+    kitEstado = kitMem[it.id] = kitMem[it.id] || { base: it.bases[0].modelo, tinte: it.bases[0].tinte || null, grupo: it.grupos[0], pant: window.NG.grupos[it.grupos[0]].ids[0] };
     $('kitBox').hidden = false;
     $('kitBases').innerHTML = '';
-    it.bases.forEach(bs => { const ch = document.createElement('button'); ch.className = 'chip' + (bs.modelo === kitEstado.base ? ' on' : ''); ch.textContent = bs.nombre;
-      ch.onclick = () => { kitEstado.base = bs.modelo; [...$('kitBases').children].forEach(x => x.classList.toggle('on', x === ch)); montaKit(false); }; $('kitBases').appendChild(ch); });
+    it.bases.forEach(bs => { const ch = document.createElement('button'); ch.className = 'chip' + (bs.modelo === kitEstado.base && (bs.tinte || null) === (kitEstado.tinte || null) ? ' on' : '');
+      if (bs.color || bs.tinte) { const d = document.createElement('span'); d.className = 'dot'; d.style.background = bs.tinte || bs.color; ch.appendChild(d); }
+      ch.appendChild(document.createTextNode(bs.nombre));
+      ch.onclick = () => { kitEstado.base = bs.modelo; kitEstado.tinte = bs.tinte || null; [...$('kitBases').children].forEach(x => x.classList.toggle('on', x === ch)); montaKit(false); }; $('kitBases').appendChild(ch); });
     $('kitGrupos').innerHTML = ''; $('kitGrupos').hidden = it.grupos.length < 2;
     it.grupos.forEach(gid => { const ch = document.createElement('button'); ch.className = 'chip' + (gid === kitEstado.grupo ? ' on' : '');
       ch.textContent = window.NG.grupos[gid].nombre + ' (' + window.NG.grupos[gid].ids.length + ')';
@@ -616,6 +623,14 @@ async function showKit(it){
   } catch(e) { console.error(e); if (my === token) $('loading').textContent = 'No se pudo cargar el modelo'; }
 }
 let kitGrupo = null, kitPantalla = null;
+function tiñe(obj, de, a){   // cambia un color de la base (p. ej. el naranja del Digivice) por el elegido
+  if (!de) return;
+  const ref = new THREE.Color(de);
+  obj.traverse(o => { if (!o.isMesh) return;
+    if (!o.userData.c0) { o.material = o.material.clone(); o.userData.c0 = o.material.color.clone(); }
+    const c0 = o.userData.c0, d = Math.abs(c0.r - ref.r) + Math.abs(c0.g - ref.g) + Math.abs(c0.b - ref.b);
+    o.material.color.copy(a && d < 0.06 ? new THREE.Color(a) : c0); });
+}
 function ponPantalla(){
   if (!kitPantalla) return;
   const b = datosBase(), sz = plantillaKit().size;
@@ -628,6 +643,7 @@ async function montaKit(primera, my = token){
   const pid = plantillaId();
   const [base, plant] = await Promise.all([getModel(kitEstado.base), getModel(pid)]);
   if (my !== token) return;
+  tiñe(base, kitActual && kitActual.tinteDe, kitEstado.tinte);
   if (!kitGrupo) kitGrupo = new THREE.Group();
   kitGrupo.clear();
   if (kitPantalla && kitPantalla.userData.pid !== pid) kitPantalla = null;
