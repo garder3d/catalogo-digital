@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo – The Crafty Teckel & Garder3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Delius&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f2ea; --card:#fffdf9; --ink:#2b2433; --soft:#857a8d; --line:#ebe3d8;
+    --g3d:#ff7a3d; --g3d2:#ffb02e; --g3dink:#2f1fbf;
+    --tk:#cbd6a2; --tkdark:#3d2a1a; --tkgreen:#2f4a22;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  img,canvas{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none}
+  input{-webkit-user-select:text;user-select:text}
+  .search{max-width:1100px;width:100%;margin:14px auto 0;padding:0 16px}
+  .search label{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:16px;padding:0 14px;box-shadow:0 2px 10px rgba(43,36,51,.06);border:2px solid transparent}
+  .search label:focus-within{border-color:var(--line)}
+  .search svg{width:20px;height:20px;color:var(--soft);flex:none}
+  .search input{flex:1;border:0;background:none;font:inherit;font-size:1rem;padding:13px 0;outline:none;color:var(--ink);min-width:0}
+  .search .clear{font-size:1.2rem;color:var(--soft);width:28px;height:28px;border-radius:50%}
+  .count{max-width:1100px;width:100%;margin:8px auto 0;padding:0 20px;color:var(--soft);font-size:.85rem}
+  .item .pic canvas{position:relative;width:88%;height:88%;object-fit:contain}
+  html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'Fredoka',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  .view{display:none;min-height:100%;flex-direction:column}
+  .view.on{display:flex}
+
+  /* ---------- MENÚ ---------- */
+  #home{align-items:center;justify-content:center;padding:32px 20px 28px;gap:26px;
+        background:radial-gradient(1200px 600px at 10% -10%,#ffe3cc 0,transparent 60%),radial-gradient(900px 600px at 110% 110%,#e3ead0 0,transparent 60%),var(--bg)}
+  .logos{display:flex;align-items:center;gap:14px}
+  .logos canvas{width:clamp(110px,30vw,170px);aspect-ratio:1;border-radius:28px;box-shadow:0 10px 30px rgba(43,36,51,.15);display:block}
+  .logos .amp{font-size:2rem;font-weight:600;color:var(--soft)}
+  .brand{text-align:center}
+  .brand h1{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:600;line-height:1.15}
+  .brand h1 .tk{font-family:'Delius',cursive;color:var(--tkdark)}
+  .brand h1 .g3{color:var(--g3dink)}
+  .brand p{color:var(--soft);margin-top:6px}
+  .menu{display:grid;gap:14px;width:min(520px,100%)}
+  .opt{display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:22px;background:var(--card);
+       box-shadow:0 4px 16px rgba(43,36,51,.07);text-align:left;transition:transform .15s,box-shadow .15s;border:2px solid transparent}
+  .opt:active{transform:scale(.98)}
+  @media (hover:hover){.opt:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(43,36,51,.12)}}
+  .opt .ic{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;flex:none}
+  .opt .ic svg{width:32px;height:32px}
+  .opt b{display:block;font-size:1.25rem;font-weight:600}
+  .opt small{color:var(--soft);font-size:.92rem}
+  .opt .arrow{margin-left:auto;color:var(--soft);font-size:1.4rem}
+  .opt.o3d .ic{background:linear-gradient(135deg,var(--g3d),var(--g3d2));color:#fff}
+  .opt.ores .ic{background:#dfe8c4;color:var(--tkgreen)}
+  .opt.ocro .ic{background:#f3dfe4;color:#8a3d55}
+  .foot{color:var(--soft);font-size:.9rem;text-align:center}
+  .fs{margin-top:-8px;font-size:.85rem;color:var(--soft);text-decoration:underline;text-underline-offset:3px}
+
+  /* ---------- BARRA ---------- */
+  .bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(247,242,234,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .back{width:42px;height:42px;border-radius:50%;background:var(--card);display:grid;place-items:center;box-shadow:0 2px 8px rgba(43,36,51,.08);font-size:1.3rem;flex:none}
+  .bar h2{font-size:1.3rem;font-weight:600;flex:1}
+  .bar canvas{width:40px;height:40px;border-radius:12px}
+
+  /* ---------- REJILLA ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;padding:18px 16px 32px;max-width:1100px;width:100%;margin:0 auto}
+  .item{background:var(--card);border-radius:22px;padding:12px 12px 14px;text-align:left;box-shadow:0 3px 14px rgba(43,36,51,.06);transition:transform .15s}
+  .item:active{transform:scale(.97)}
+  .item .pic{aspect-ratio:1;border-radius:16px;display:grid;place-items:center;overflow:hidden;position:relative}
+  .item .pic::before{content:"";position:absolute;inset:14%;border-radius:50%;background:var(--halo,#ffe7d4)}
+  .item b{display:block;margin-top:10px;font-weight:600;font-size:1.05rem}
+  .item small{color:var(--soft);font-size:.82rem}
+  .badge3d{position:absolute;top:8px;right:8px;font-size:.7rem;font-weight:600;background:var(--ink);color:#fff;padding:3px 7px;border-radius:99px}
+  .empty{margin:40px auto;max-width:420px;text-align:center;color:var(--soft);padding:0 24px;line-height:1.5}
+  .empty .big{font-size:3rem;margin-bottom:8px}
+
+  /* ---------- VISOR ---------- */
+  #visor{height:100%;min-height:100dvh}
+  #stage{flex:1;position:relative;min-height:50vh;touch-action:none}
+  #stage canvas{position:absolute;z-index:1;inset:0;width:100%;height:100%;display:block}
+  #stage .halo{position:absolute;z-index:0;left:50%;top:50%;width:min(80vw,62vh);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#ffe7d4 0,rgba(255,231,212,0) 70%)}
+  #loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--soft);font-size:1.05rem;z-index:2}
+  .hint{position:absolute;z-index:2;bottom:10px;left:0;right:0;text-align:center;font-size:.85rem;color:var(--soft);pointer-events:none;transition:opacity .6s}
+  .nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,253,249,.9);box-shadow:0 2px 10px rgba(43,36,51,.12);font-size:1.4rem;display:grid;place-items:center;z-index:3}
+  .nav.prev{left:12px}.nav.next{right:12px}
+  .info{background:var(--card);border-radius:26px 26px 0 0;padding:20px 22px 26px;box-shadow:0 -6px 24px rgba(43,36,51,.08)}
+  .info .inner{max-width:720px;margin:0 auto}
+  .tag{display:inline-block;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--g3d);padding:4px 10px;border-radius:99px}
+  .info h3{font-size:1.7rem;font-weight:600;margin:8px 0 4px}
+  .info p{color:var(--soft);line-height:1.45}
+  .swatches{display:flex;gap:8px;margin-top:12px;align-items:center}
+  .swatches span{width:22px;height:22px;border-radius:50%;border:2px solid var(--line)}
+  .swatches em{font-style:normal;font-size:.82rem;color:var(--soft);margin-left:4px}
+  .photo{position:relative;flex:1;display:grid;place-items:center;padding:16px 64px;min-height:300px;height:52vh}
+  .photo canvas{width:100%;height:100%;filter:drop-shadow(0 14px 22px rgba(43,36,51,.18))}
+  .price{font-size:1.35rem;font-weight:600;color:var(--tkgreen);margin:2px 0 8px}
+  .vlabel{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--soft);margin:14px 0 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:8px 14px;border-radius:99px;background:var(--bg);border:2px solid var(--line);font-size:.95rem;transition:all .15s}
+  .chip.on{background:var(--tkgreen);border-color:var(--tkgreen);color:#fff}
+  .shop{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 16px;border-radius:14px;background:var(--tkdark);color:#fff;text-decoration:none;font-weight:500}
+  .item .meta{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-top:2px}
+  .item .meta em{font-style:normal;font-weight:600;color:var(--tkgreen);font-size:.92rem;white-space:nowrap}
+  .vcount{position:absolute;top:8px;right:8px;font-size:.7rem;font-weight:600;background:var(--tkgreen);color:#fff;padding:3px 8px;border-radius:99px}
+  .screens{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .scr{flex:none;width:62px;height:62px;border-radius:12px;border:3px solid var(--line);background:#fff;padding:3px;scroll-snap-align:start}
+  .scr canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
+  .scr.on{border-color:var(--g3d)}
+  .opt3d{display:flex;flex-wrap:wrap;gap:8px}
+  .opt3d .chip.on{background:var(--g3d);border-color:var(--g3d)}
+  .focus{position:absolute;z-index:3;right:12px;bottom:34px;padding:8px 14px;border-radius:99px;background:rgba(255,253,249,.92);box-shadow:0 2px 10px rgba(43,36,51,.12);font-size:.88rem;font-weight:500}
+  .chip .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.15)}
+  .basebadge{font-size:.85rem;color:var(--soft);margin-top:10px}
+  .descargas{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .descargas a{padding:8px 12px;border-radius:12px;background:var(--bg);border:2px solid var(--line);color:var(--ink);text-decoration:none;font-size:.9rem;font-weight:500}
+  .credit{font-size:.8rem;color:var(--soft);margin-top:14px}
+</style>
+<script src="assets.js"></script>
+<script src="catalogo-tienda.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+
+<!-- ============ MENÚ INICIAL ============ -->
+<section class="view" id="home">
+  <div class="logos">
+    <canvas id="logoTk"></canvas>
+    <span class="amp">&amp;</span>
+    <canvas id="logoG3"></canvas>
+  </div>
+  <div class="brand">
+    <h1><span class="tk">The Crafty Teckel</span> &amp; <span class="g3">Garder3D</span></h1>
+    <p>Hecho a mano · resina · crochet · impresión 3D</p>
+  </div>
+  <div class="menu">
+    <button class="opt o3d" data-go="impresion-3d">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg></span>
+      <span><b>Impresión 3D</b><small>Figuras en 3D · gíralas con el dedo</small></span>
+      <span class="arrow">›</span>
+    </button>
+    <button class="opt ores" data-go="resina">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5C9 7 6 10.2 6 14a6 6 0 0 0 12 0c0-3.8-3-7-6-11.5z"/><path d="M9.5 15.5a2.6 2.6 0 0 0 2.5 2"/></svg></span>
+      <span><b>Resina</b><small>The Crafty Teckel</small></span>
+      <span class="arrow">›</span>
+    </button>
+    <button class="opt ocro" data-go="crochet">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="13" r="7.5"/><path d="M4.5 10c3 1 9 1 13-2M4 14c4 1.5 10 1 14-2.5M7 19c2-3 6-6 11-7"/><path d="M17 6 21 2"/></svg></span>
+      <span><b>Crochet</b><small>The Crafty Teckel</small></span>
+      <span class="arrow">›</span>
+    </button>
+  </div>
+  <button class="fs" id="fsBtn">Pantalla completa</button>
+  <div class="foot">hecho por @garder3d</div>
+</section>
+
+<!-- ============ LISTADOS ============ -->
+<section class="view" id="lista">
+  <div class="bar"><button class="back" data-go="">‹</button><h2 id="listaTitulo"></h2><canvas id="listaLogo"></canvas></div>
+  <div class="search"><label>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+    <input id="buscar" type="text" placeholder="Buscar…" autocomplete="off" enterkeyhint="search">
+    <button class="clear" id="limpiar" aria-label="Borrar búsqueda" hidden>×</button>
+  </label></div>
+  <div class="count" id="contador"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="vacio" hidden><div class="big">🧶</div><p id="vacioTxt">Muy pronto verás aquí los productos.</p></div>
+</section>
+
+<!-- ============ DETALLE ============ -->
+<section class="view" id="visor">
+  <div class="bar"><button class="back" id="volver">‹</button><h2 id="visorSeccion"></h2><canvas id="visorLogo"></canvas></div>
+  <div id="stage">
+    <div class="halo"></div>
+    <div id="loading">Cargando…</div>
+    <button class="nav prev" id="prev" aria-label="Anterior">‹</button>
+    <button class="nav next" id="next" aria-label="Siguiente">›</button>
+    <div class="hint" id="hint">Arrastra para girar · pellizca para acercar</div>
+    <button class="focus" id="focusBtn" hidden>🔍 Ver la pantalla</button>
+  </div>
+  <div class="photo" id="photo" hidden><canvas id="photoImg"></canvas></div>
+  <div class="info"><div class="inner">
+    <span class="tag" id="vTag"></span>
+    <h3 id="vNombre"></h3>
+    <div class="price" id="vPrecio" hidden></div>
+    <p id="vDesc"></p>
+    <div class="swatches" id="vColores"></div>
+    <div id="vVarBox" hidden><div class="vlabel" id="vVarLabel">Variantes</div><div class="chips" id="vChips"></div></div>
+    <div id="kitBox" hidden>
+      <div class="vlabel">Dispositivo</div><div class="opt3d" id="kitBases"></div>
+      <div class="vlabel" id="kitPLabel">Pantalla</div>
+      <div class="opt3d" id="kitGrupos" style="margin-bottom:10px"></div>
+      <div class="screens" id="kitPantallas"></div>
+    </div>
+    <div id="pkBox" hidden>
+      <div class="vlabel" id="pkLabel">Pikmin</div><div class="opt3d" id="pkChips"></div>
+      <div class="basebadge" id="pkBase"></div>
+    </div>
+    <div id="vDesc2" hidden><div class="vlabel">Descarga oficial del modelo</div><div class="descargas" id="vDescargas"></div></div>
+    <a class="shop" id="vShop" target="_blank" rel="noopener" hidden>Ver en la tienda ›</a>
+  </div></div>
+</section>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+const A = window.ASSETS;
+const K = () => String.fromCharCode(...[53,48,52,50,102,102,99,57,102,101,54,49,48,51,57,54,99,97,51,56,53,99,102,48].reverse());
+
+/* ==================== CATÁLOGO (editar aquí) ==================== */
+const SECCIONES = {
+  'impresion-3d': { titulo:'Impresión 3D', tag:'Impresión 3D', logo:'logo_garder3d', halo:'#ffe7d4', items:[
+    { id:'sans',    nombre:'Figura Sans', tipo:'3d', desc:'Fanart de Sans (Undertale) esculpido a mano en Nomad Sculpt e impreso a cuatro colores.', colores:['#FFFFFF','#0056B8','#8080FF','#000000'] },
+    { id:'zoovik',  nombre:'Zoovik', descargas:[['MakerWorld','https://makerworld.com/es/models/3289167'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/zoovik-garder3d-creations-garder3d']],      tipo:'3d', desc:'Personaje original creado por Garder3D, esculpido a mano en Nomad Sculpt e impreso en color.', colores:['#FF9D6F','#000001'] },
+    { id:'bloovik', nombre:'Bloovik',     tipo:'3d', desc:'La variante más graciosa de Zoovik, en versión gallina. Diseño original de Garder3D.', colores:['#FF9016','#000000'] },
+    { id:'evangotchi', tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-evangotchi-clicker-evangelion'],['Patreon','https://www.patreon.com/cw/Garder3D']], nombre:'Evangotchi', tipo:'kit', desc:'N-Gotchi edición Evangelion. Elige la unidad EVA y la pantalla: la pantalla es la tecla que hace click.',
+      bases:[ {modelo:'eva-base-00', nombre:'EVA-00'}, {modelo:'eva-base-01', nombre:'EVA-01'}, {modelo:'eva-base-02', nombre:'EVA-02'} ], grupos:['eva'] },
+    { id:'n-gotchi-original', descargas:[['MakerWorld','https://makerworld.com/es/models/2660440'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/n-gotchi-mascota-virtual-pulsador-clicker-antiestres'],['MakerWorld','https://makerworld.com/es/models/2982991'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi Original', tipo:'kit', desc:'El primer N-Gotchi, el modelo base de la gama. Clicker estilo Tamagotchi con pulsador mecánico: la pantalla es la tecla.',
+      bases:[ {modelo:'ng-original', nombre:'Original'} ], grupos:['garder3d','retro','pokemon'] },
+    { id:'n-gotchi-v2', descargas:[['MakerWorld','https://makerworld.com/es/models/2850735'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-pokemon-n-gotchi-v2-virtual-pet-retro'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi V2', tipo:'kit', desc:'El N-Gotchi rediseñado, en tres versiones. Elige la carcasa y la pantalla que más te guste.',
+      bases:[ {modelo:'ng-v2-calavera', nombre:'Calavera'}, {modelo:'ng-v2-corazon', nombre:'Corazón'}, {modelo:'ng-v2-estrella', nombre:'Estrella'} ], grupos:['garder3d','retro','pokemon'] },
+    { id:'n-gotchi-pokemon', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-pikachu-peakychu-edition-pokemon-pokopia'],['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', nombre:'N-Gotchi Pokémon', tipo:'kit', desc:'N-Gotchi en versión Pokémon. Elige el modelo y la pantalla.',
+      bases:[ {modelo:'ng-poke-pikachu', nombre:'Pikachu'}, {modelo:'ng-poke-palidachu', nombre:'Palidachu'} ], grupos:['pokemon','retro','garder3d'] },
+    { id:'kittygotchi', tienda:'https://thecraftyteckel.com/product/variedad-clicker-n-gotchi-mini-tamagotchi', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mini-tamagotchi-n-gotchi-kittygotchi-clicker-hello-kitty'],['Patreon','https://www.patreon.com/cw/Garder3D']], nombre:'Kittygotchi', tipo:'kit', desc:'N-Gotchi edición Hello Kitty y Kuromi. Elige el gatito y la pantalla.',
+      bases:[ {modelo:'ng-kitty-pure', nombre:'Pure Cat'}, {modelo:'ng-kitty-evil', nombre:'Evil Cat'} ], grupos:['kitty'] },
+    { id:'pikmin-clicker', nombre:'Pikmin Clicker', tipo:'pikmin', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']], tienda:'https://thecraftyteckel.com/product/clicker-pikmin',
+      desc:'Mi clicker más famoso: el Pikmin es la tecla. Todos comparten maceta, salvo las ediciones especiales de Halloween (calabaza) y Navidad (regalo).',
+      bases:{ maceta:{nombre:'Maceta', y:11.11}, calabaza:{nombre:'Calabaza · edición Halloween', y:33.704}, regalo:{nombre:'Caja regalo · edición Navidad', y:9.735} },
+      figuras:[
+        {id:'rojo', nombre:'Rojo', color:'#e53935', base:'maceta'}, {id:'amarillo', nombre:'Amarillo', color:'#f4d03f', base:'maceta', descargas:[['MakerWorld','https://makerworld.com/es/models/2699562'],['Patreon','https://www.patreon.com/cw/Garder3D']]},
+        {id:'azul', nombre:'Azul', color:'#1e5bd8', base:'maceta', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/clicker-pikmin-azul'],['Patreon','https://www.patreon.com/cw/Garder3D']]}, {id:'morado', nombre:'Morado', color:'#7b3fa0', base:'maceta', descargas:[['MakerWorld','https://makerworld.com/es/models/2915131'],['Patreon','https://www.patreon.com/cw/Garder3D']]},
+        {id:'blanco', nombre:'Blanco', color:'#f5f5f5', base:'maceta', descargas:[['MakerWorld','https://makerworld.com/es/models/2915186'],['Patreon','https://www.patreon.com/cw/Garder3D']]}, {id:'alado', nombre:'Alado', color:'#f48fb1', base:'maceta'},
+        {id:'petreo', nombre:'Pétreo', color:'#6d6d7a', base:'maceta', descargas:[['MakerWorld','https://makerworld.com/es/models/3011672'],['Patreon','https://www.patreon.com/cw/Garder3D']]}, {id:'gelido', nombre:'Gélido', color:'#9fe3ff', base:'maceta', descargas:[['MakerWorld','https://makerworld.com/es/models/3011605'],['Patreon','https://www.patreon.com/cw/Garder3D']]},
+        {id:'luminoso', nombre:'Luminoso', color:'#7cfc9a', base:'maceta', descargas:[['MakerWorld','https://makerworld.com/es/models/3011638'],['Patreon','https://www.patreon.com/cw/Garder3D']]},
+        {id:'halloween', nombre:'🎃 Halloween', color:'#ff9016', base:'calabaza', cupula:true, descargas:[['MakerWorld','https://makerworld.com/es/models/3509023'],['Patreon','https://www.patreon.com/cw/Garder3D']]}, {id:'navidad', nombre:'🎁 Navidad', color:'#2e9e4f', base:'regalo', descargas:[['MakerWorld','https://makerworld.com/es/models/3597530'],['Patreon','https://www.patreon.com/cw/Garder3D']]} ] },
+    { id:'clicker-pokemon-go', nombre:'Clicker Pokémon GO', tipo:'combo', etiqueta:'Pokémon', claves:'clicker huevo pokemon go eclosion',
+      desc:'El huevo de Pokémon GO es la base y el Pokémon que eclosiona es la tecla que hace click.',
+      descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokemon-go-wooper-pichu-clicker'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokemon-go-torchic-ralts-clicker'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ huevo:{nombre:'Huevo Pokémon GO', modelo:'b3-huevo-go-base'} },
+      figuras:[ {id:'pichu', nombre:'Pichu', color:'#f4e04d', base:'huevo', modelo:'b3-huevo-go-pichu', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokemon-go-wooper-pichu-clicker']]},
+        {id:'ralts', nombre:'Ralts', color:'#7ccf7a', base:'huevo', modelo:'b3-huevo-go-ralts', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokemon-go-torchic-ralts-clicker']]},
+        {id:'torchic', nombre:'Torchic', color:'#ffb020', base:'huevo', modelo:'b3-huevo-go-torchic', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokemon-go-torchic-ralts-clicker']]},
+        {id:'wooper-kanto', nombre:'Wooper de Kanto', color:'#4fb3ff', base:'huevo', modelo:'b3-huevo-go-wooper-kanto', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokemon-go-wooper-pichu-clicker']]},
+        {id:'wooper-paldea', nombre:'Wooper de Paldea', color:'#8a5a3c', base:'huevo', modelo:'b3-huevo-go-wooper-paldea', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokemon-go-wooper-pichu-clicker']]} ] },
+    { id:'catlien', tienda:'https://thecraftyteckel.com/product/clicker-catlien', nombre:'Catlien Clicker', tipo:'combo', etiqueta:'Gatito alienígena', claves:'clicker gatos alienigenas nave ovni',
+      desc:'Gatitos alienígenas asomando de su nave: la nave es la base y cada gatito es la tecla.',
+      descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/catlien-clicker-gatos-alienigenas-antiestres'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ nave:{nombre:'Nave', modelo:'b3-catlien-base'} },
+      figuras:[1,2,3,4,5].map(n => ({id:'gato-'+n, nombre:'Gatito '+n, color:'#80ff00', base:'nave', modelo:'b3-catlien-gato-'+n})) },
+    { id:'culito-de-pato', nombre:'Clicker Culito de Pato', tipo:'combo', claves:'clicker pato patito lago duck butt',
+      desc:'Un patito buceando boca abajo en el lago: el lago es la base y el culito del pato, la tecla.',
+      descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/duck-butt-clicker'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ lago:{nombre:'Lago con pez', modelo:'b3-pato-base'} }, figuras:[ {id:'pato', nombre:'Pato', base:'lago', modelo:'b3-pato-pato'} ] },
+    { id:'clicker-paella', tienda:'https://thecraftyteckel.com/product/clicker-de-paella-espanola', nombre:'Clicker Paella', tipo:'combo', claves:'clicker paella paellera arroz',
+      desc:'La paellera es la base y el arroz, la tecla que hace click.',
+      bases:{ paellera:{nombre:'Paellera', modelo:'b3-paella-base'} }, figuras:[ {id:'arroz', nombre:'Arroz', base:'paellera', modelo:'b3-paella-arroz'} ] },
+    { id:'clicker-raton', nombre:'Clicker Ratón', tipo:'combo', claves:'clicker raton queso mouse cheese',
+      desc:'Un ratoncito sobre su queso: el queso es la base y el ratón, la tecla.',
+      descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/mouse-on-cheese-clicker'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ queso:{nombre:'Queso', modelo:'b3-raton-base'} }, figuras:[ {id:'raton', nombre:'Ratón', base:'queso', modelo:'b3-raton-raton'} ] },
+    { id:'conejito-de-pascua', nombre:'Conejito de Pascua', tipo:'combo', etiqueta:'Conejito', claves:'clicker conejo conejito pascua easter huevo bunny',
+      desc:'El huevo de Pascua es la base y la cabecita del conejo, la tecla. Varias expresiones a elegir.',
+      descargas:[['MakerWorld','https://makerworld.com/es/models/2521514'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ huevo:{nombre:'Huevo de Pascua', modelo:'b3-conejo-base'} },
+      figuras:[ {id:'clasico', nombre:'Clásico', color:'#f9aafb', base:'huevo', modelo:'b3-conejo-clasico'},
+        {id:'feliz', nombre:'Feliz', color:'#f9aafb', base:'huevo', modelo:'b3-conejo-feliz'},
+        {id:'gafas', nombre:'Con gafas', color:'#222222', base:'huevo', modelo:'b3-conejo-gafas'} ] },
+    { id:'chibi-mewtwo', tienda:'https://thecraftyteckel.com/product/llavero-chibi-mewtwo', nombre:'Chibi Mewtwo', tipo:'3d', modelo:'b3-mewtwo', claves:'figura pokemon 151',
+      desc:'Figura chibi de Mewtwo.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/chibi-mewtwo-figura-pokemon-151-garder3d'],['Patreon','https://www.patreon.com/cw/Garder3D']] },
+    { id:'cucugato', tienda:'https://thecraftyteckel.com/product/llavero-cucugato-meme-cucurella-gato-mundial-espana-2026', nombre:'Cucugato', tipo:'3d', modelo:'b3-cucugato', claves:'figura meme gato cucurella españa mundial',
+      desc:'El meme del gato Cucurella, en figura.', descargas:[['MakerWorld','https://makerworld.com/es/models/3071169'],['Patreon','https://www.patreon.com/cw/Garder3D']] },
+    { id:'murkrow-cubone', nombre:'Murkrow y cráneo de Cubone', tipo:'3d', modelo:'b3-murkrow-cubone', claves:'figura pokemon murkrow cubone craneo',
+      desc:'Figura de Murkrow posado sobre el cráneo de Cubone.' },
+    { id:'dead-regi-trio', nombre:'Dead Regi Trio', tipo:'combo', etiqueta:'Regi', claves:'figura pokemon clover regirode regimelt regirust',
+      desc:'En honor al trío de Regis muertos de Pokémon Clover: Regirode, Regimelt y Regirust.',
+      descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/dead-regi-trio-bundle-pack-regirode-regimelt-regirust'],['Patreon','https://www.patreon.com/cw/Garder3D']], bases:{},
+      figuras:[ {id:'regirode', nombre:'Regirode', color:'#ff9016', modelo:'b3-regi-rode', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/dead-regi-trio-245-regirode']]},
+        {id:'regimelt', nombre:'Regimelt', color:'#5bc1ff', modelo:'b3-regi-melt', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/dead-regi-trio-246-regimelt']]},
+        {id:'regirust', nombre:'Regirust', color:'#9d432c', modelo:'b3-regi-rust', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/dead-regi-trio-247-regirust']]} ] },
+    { id:'flexi-growlithe', tienda:'https://thecraftyteckel.com/product/flexi-growlithe-pokemon', nombre:'Flexi Growlithe', tipo:'combo', etiqueta:'Versión', claves:'figura flexi articulado pokemon growlithe kanto hisui',
+      desc:'Growlithe articulado, impreso sin soportes. En versión de Kanto y de Hisui.',
+      descargas:[['MakerWorld','https://makerworld.com/es/models/3141729'],['Patreon','https://www.patreon.com/cw/Garder3D']], bases:{},
+      figuras:[ {id:'kanto', nombre:'Kanto', color:'#c12e1f', modelo:'b3-growlithe-kanto'}, {id:'hisui', nombre:'Hisui', color:'#ffffff', modelo:'b3-growlithe-hisui'} ] },
+    { id:'kirby-clicker', nombre:'Kirby Clicker', tipo:'combo', tienda:'https://thecraftyteckel.com/product/clicker-de-kirby', claves:'clicker kirby estrella',
+      desc:'Kirby dormido sobre su estrella: la estrella es la base y Kirby, la tecla.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/kirby-clicker-estrella-remolque-antiestres'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ e:{nombre:'Estrella', modelo:'b4-kirby-base'} }, figuras:[ {id:'kirby', nombre:'Kirby', base:'e', modelo:'b4-kirby-kirby'} ] },
+    { id:'clicker-halloween', nombre:'Clicker Halloween Perro y Gato', tipo:'combo', etiqueta:'Cabeza', claves:'clicker halloween calabaza perro gato',
+      desc:'La calabaza es la base y la cabecita, la tecla. Elige entre el gato y el perro.',
+      bases:{ c:{nombre:'Calabaza', modelo:'b4-halloween-base'} },
+      figuras:[ {id:'gato', nombre:'Gato', color:'#ffffff', base:'c', modelo:'b4-halloween-gato'}, {id:'perro', nombre:'Perro', color:'#8a5a3c', base:'c', modelo:'b4-halloween-perro'} ] },
+    { id:'gimmighoul-clicker', nombre:'Gimmighoul Clicker', tipo:'3d', modelo:'b5-gimmighoul', tienda:'https://thecraftyteckel.com/product/gimmighoul-clicker-pulsador-pokemon', claves:'clicker pokemon gimmighoul cofre escarlata purpura',
+      desc:'Gimmighoul asomando de su cofre lleno de monedas: el cofre es la base y Gimmighoul, la tecla.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/gimmighoul-clicker-pulsador-pokemon-escarlata-purpura'],['Patreon','https://www.patreon.com/cw/Garder3D']] },
+    { id:'teddiursa-iced-coffee', nombre:'Teddiursa Iced Coffee', tipo:'combo', tienda:'https://thecraftyteckel.com/product/clicker-teddiursa-iced-coffee', claves:'clicker pokemon cafe remix teddiursa helado vaso',
+      desc:'El café helado de Teddiursa de Pokémon Café ReMix: el vaso es la base y la tapa con la pajita, la tecla.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/food-themed-pokemon-clicker-pikamburger-teddiursa-iced-coffee'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ v:{nombre:'Vaso', modelo:'b4-teddiursa-base'} }, figuras:[ {id:'p', nombre:'Tapa y pajita', base:'v', modelo:'b4-teddiursa-pajita'} ] },
+    { id:'pastel-novia-cadaver', nombre:'Clicker Pastel Novia Cadáver', tipo:'combo', claves:'clicker pastel tarta novia cadaver tim burton',
+      desc:'La tarta de La novia cadáver: los pisos de abajo son la base y el de arriba, la tecla.',
+      bases:{ b:{nombre:'Tarta', modelo:'b4-pastel-base'} }, figuras:[ {id:'t', nombre:'Piso superior', base:'b', modelo:'b4-pastel-top'} ] },
+    { id:'phantump-clicker', nombre:'Phantump Clicker', tipo:'combo', claves:'clicker pokemon phantump',
+      desc:'Clicker de Phantump.', bases:{ c:{nombre:'Cabeza', modelo:'b4-phantump-base'} }, figuras:[ {id:'c', nombre:'Cuerpo', base:'c', modelo:'b4-phantump-cuerpo'} ] },
+    { id:'giroide-clicker', nombre:'Giroide Clicker', tipo:'combo', tienda:'https://thecraftyteckel.com/product/clicker-de-giroide-animal-crossing', claves:'clicker giroide animal crossing gyroid',
+      desc:'Giroide de Animal Crossing: el cuerpo es la base y el gorro, la tecla.', descargas:[['MakerWorld','https://makerworld.com/es/models/2316584'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ g:{nombre:'Giroide', modelo:'b4-giroide-base'} }, figuras:[ {id:'g', nombre:'Gorro', base:'g', modelo:'b4-giroide-gorro'} ] },
+    { id:'pikamburguesa', nombre:'Pikamburguesa Clicker', tipo:'combo', tienda:'https://thecraftyteckel.com/product/clicker-pikamburguesa', claves:'clicker pokemon pikachu hamburguesa pikamburger',
+      desc:'La Pikamburguesa: la parte de abajo es la base y el pan con la cara de Pikachu, la tecla.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/food-themed-pokemon-clicker-pikamburger-teddiursa-iced-coffee'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ b:{nombre:'Plato y relleno', modelo:'b4-pikamburguesa-base'} }, figuras:[ {id:'p', nombre:'Pan', base:'b', modelo:'b4-pikamburguesa-pan'} ] },
+    { id:'happy-hippo', nombre:'Happy Hippo Clicker', tipo:'combo', vistaAz:1.05, etiqueta:'Cabeza', tienda:'https://thecraftyteckel.com/product/clicker-happy-hippo-triple-pulsador-hocico-cabeza-trasero', claves:'clicker hipopotamo triple pulsador',
+      desc:'Triple clicker: hocico, cabeza y trasero, cada uno con su pulsador. La cabeza tiene tres miradas.',
+      fijos:['b4-hippo-morro','b4-hippo-culo'], bases:{ b:{nombre:'Barro', modelo:'b4-hippo-base'} },
+      figuras:[ {id:'medio3', nombre:'Ojos hacia arriba', base:'b', modelo:'b4-hippo-medio3'}, {id:'medio2', nombre:'Mirada perdida', base:'b', modelo:'b4-hippo-medio2'},
+        {id:'medio1', nombre:'Ojos al hocico', base:'b', modelo:'b4-hippo-medio1'} ] },
+    { id:'gamballina', nombre:'Gamballina', tipo:'3d', modelo:'b4-gamballina', tienda:'https://thecraftyteckel.com/product/llavero-gamballina-shricken', claves:'figura gamba gallina shricken meme',
+      desc:'Mitad gamba, mitad gallina: el meme «shricken».', descargas:[['MakerWorld','https://makerworld.com/es/models/3007217'],['MakerWorld','https://makerworld.com/es/models/3007022'],['Patreon','https://www.patreon.com/cw/Garder3D']] },
+    { id:'jake-de-bolsillo', nombre:'Jake de Bolsillo', tipo:'3d', modelo:'b4-jake', tienda:'https://thecraftyteckel.com/product/jake-de-bolsillo-hora-de-aventuras', claves:'figura hora de aventuras adventure time',
+      desc:'Jake de Hora de Aventuras, con las manitas listas para asomarse del bolsillo de una camisa.', descargas:[['MakerWorld','https://makerworld.com/es/models/2249832'],['Patreon','https://www.patreon.com/cw/Garder3D']] },
+    { id:'figuras-persona', nombre:'Figuras de Persona', tipo:'combo', etiqueta:'Figura', claves:'figura persona atlus jack frost lantern pixie nyx',
+      desc:'Figuras de la saga Persona.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/persona-3-jack-frost-jack-lantern-pixie'],['Patreon','https://www.patreon.com/cw/Garder3D']], bases:{},
+      figuras:[ {id:'jack-frost', nombre:'Jack Frost', color:'#3a4fd0', modelo:'b4-jack-frost', tienda:'https://thecraftyteckel.com/product/jack-frost-persona', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/persona-3-jack-frost']]},
+        {id:'jack-lantern', nombre:'Jack Lantern', color:'#ff9016', modelo:'b4-jack-lantern', tienda:'https://thecraftyteckel.com/product/jack-lantern-persona', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/persona-3-jack-lantern']]},
+        {id:'pixie', nombre:'Pixie', color:'#e33', modelo:'b4-pixie', tienda:'https://thecraftyteckel.com/product/pixie-persona', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/persona-3-pixie']]},
+        {id:'pixie-vestida', nombre:'Pixie con guantes y botas', color:'#2a55d6', modelo:'b4-pixie-vestida', tienda:'https://thecraftyteckel.com/product/pixie-persona', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/persona-3-pixie']]},
+        {id:'nyx', nombre:'Nyx', color:'#222', modelo:'b4-nyx', descargas:[['MakerWorld','https://makerworld.com/es/models/2834324'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/nyx-avatar-persona-3-nfc-final-boss-keychain']]} ] },
+    { id:'flexi-marsupilami', nombre:'Flexi Marsupilami', tipo:'combo', etiqueta:'Versión', tienda:'https://thecraftyteckel.com/product/flexi-marsupilami', claves:'figura flexi articulado marsupilami',
+      desc:'Marsupilami articulado, en tres versiones.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/flexi-marsupilami'],['Patreon','https://www.patreon.com/cw/Garder3D']], bases:{},
+      figuras:[ {id:'v2', nombre:'Clásico', color:'#f4e04d', modelo:'b4-marsu-v2'}, {id:'voxel', nombre:'Brazos vóxel', color:'#f4e04d', modelo:'b4-marsu-voxel'},
+        {id:'colgante', nombre:'Colgante', color:'#f4e04d', modelo:'b4-marsu-colgante'} ] },
+    { id:'iniciales-viento-oleaje', nombre:'Iniciales Pokémon Viento y Oleaje', tipo:'combo', etiqueta:'Inicial', claves:'figura chibi pokemon viento oleaje winds waves browt gecqua pombon iniciales',
+      desc:'Los tres iniciales de Pokémon Viento y Oleaje, en versión chibi.', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']], bases:{},
+      figuras:[ {id:'browt', nombre:'Browt', color:'#e9edb8', modelo:'b4-browt', tienda:'https://thecraftyteckel.com/product/llavero-chibi-browt-pokemon-viento-y-oleaje', descargas:[['MakerWorld','https://makerworld.com/es/models/2482937'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/chibi-browt-pokemon-winds-waves-ams']]},
+        {id:'gecqua', nombre:'Gecqua', color:'#3b3bd9', modelo:'b4-gecqua', tienda:'https://thecraftyteckel.com/product/llavero-chibi-gecqua-pokemon-viento-y-oleaje', descargas:[['MakerWorld','https://makerworld.com/es/models/2482940'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/chibi-gecqua-pokemon-winds-waves-ams']]},
+        {id:'pombon', nombre:'Pombon', color:'#f08a3c', modelo:'b4-pombon', tienda:'https://thecraftyteckel.com/product/llavero-chibi-pombon-pokemon-viento-y-oleaje', descargas:[['MakerWorld','https://makerworld.com/es/models/2482927'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/chibi-pombon-pokemon-winds-waves-ams']]} ] },
+    { id:'pumpkaboo-clicker', nombre:'Pumpkaboo Clicker', tipo:'combo', claves:'clicker pokemon pumpkaboo calabaza halloween', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Pumpkaboo asomando de su calabaza: la calabaza es la base y la cabeza, la tecla.',
+      bases:{ b:{nombre:'Calabaza', modelo:'b6-pumpkaboo-base'} }, figuras:[ {id:'p', nombre:'Pumpkaboo', color:'#7a4a2a', base:'b', modelo:'b6-pumpkaboo-pumpkaboo'} ] },
+    { id:'punky-clicker', nombre:'Punky Clicker', tipo:'combo', claves:'clicker punky la menorquina helado polo', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Punky, el polo de La Menorquina: el cuerpo es la base y la cabeza con la cresta, la tecla.',
+      bases:{ b:{nombre:'Cuerpo', modelo:'b6-punky-base'} }, figuras:[ {id:'p', nombre:'Punky', color:'#000', base:'b', modelo:'b6-punky-punky'} ] },
+    { id:'ranita-calabaza', nombre:'Clicker Ranita Calabaza', tipo:'combo', claves:'clicker rana ranita calabaza halloween', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Una ranita metida en su calabaza de Halloween: la calabaza es la base y la cabeza de la rana, la tecla.',
+      bases:{ b:{nombre:'Calabaza', modelo:'b6-ranita-base'} }, figuras:[ {id:'r', nombre:'Ranita', color:'#5fc23a', base:'b', modelo:'b6-ranita-rana'} ] },
+    { id:'smoliv-clicker', nombre:'Smoliv Clicker', tipo:'combo', etiqueta:'Versión', claves:'clicker pokemon smoliv aceituna oliva escarlata purpura variocolor shiny', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/smoliv-clicker-pokemon-escarlata-y-purpura'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Smoliv con su aceituna en la cabeza: la aceituna es la tecla. En versión normal, con aceituna verde, y Variocolor, con aceituna negra.',
+      bases:{ b:{nombre:'Smoliv', modelo:'b6-smoliv-base'} }, figuras:[ {id:'verde', nombre:'Normal (aceituna verde)', color:'#9db83c', base:'b', modelo:'b6-smoliv-verde'}, {id:'negra', nombre:'Variocolor (aceituna negra)', color:'#1b1d17', base:'b', modelo:'b6-smoliv-negra'} ] },
+    { id:'spamton-clicker', nombre:'Spamton Clicker', tipo:'combo', claves:'clicker deltarune spamton caja', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/spamton-clicker-deltarune'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Spamton saliendo de su cubo, de Deltarune: el cubo es la base y Spamton, la tecla.',
+      bases:{ b:{nombre:'Cubo', modelo:'b6-spamton-base'} }, figuras:[ {id:'s', nombre:'Spamton', color:'#222', base:'b', modelo:'b6-spamton-spamton'} ] },
+    { id:'tenna-clicker', nombre:'Tenna Clicker', tipo:'combo', etiqueta:'Cara', claves:'clicker deltarune tenna television tv microfono', fijos:['b6-tenna-micro','b6-tenna-corbata'], descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Tenna, de Deltarune, micrófono en mano: el cuerpo es la base y la cabeza, la tecla. Elige su cara.',
+      bases:{ b:{nombre:'Cuerpo', modelo:'b6-tenna-base'} }, figuras:[ {id:'feliz', nombre:'Feliz', color:'#c184ff', base:'b', modelo:'b6-tenna-feliz'}, {id:'malo', nombre:'Enfadado', color:'#c184ff', base:'b', modelo:'b6-tenna-malo'}, {id:'l', nombre:'L', color:'#c184ff', base:'b', modelo:'b6-tenna-l'}, {id:'smug', nombre:'Chulito', color:'#c184ff', base:'b', modelo:'b6-tenna-smug'}, {id:'boca', nombre:'Boca abierta', color:'#c184ff', base:'b', modelo:'b6-tenna-boca'} ] },
+    { id:'tostada-clicker', nombre:'Tostada Clicker', tipo:'combo', etiqueta:'Cara', claves:'clicker tostada pan sandwich queso cara kawaii', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Una tostada con mucha cara: la de abajo es la base y la de arriba, la tecla. Elige la expresión.',
+      bases:{ b:{nombre:'Tostada de abajo', modelo:'b6-tostada-base'} }, figuras:[ {id:'feliz', nombre:'Feliz', color:'#e3a35a', base:'b', modelo:'b6-tostada-feliz'}, {id:'triste', nombre:'Triste', color:'#e3a35a', base:'b', modelo:'b6-tostada-triste'}, {id:'neutral', nombre:'Neutral', color:'#e3a35a', base:'b', modelo:'b6-tostada-neutral'}, {id:'normal', nombre:'Sin cara', color:'#e3a35a', base:'b', modelo:'b6-tostada-normal'} ] },
+    { id:'vileplume-clicker', nombre:'Vileplume Clicker', tipo:'combo', claves:'clicker pokemon vileplume flor', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'Vileplume: el cuerpo es la base y la gran flor, la tecla.',
+      bases:{ b:{nombre:'Cuerpo', modelo:'b6-vileplume-base'} }, figuras:[ {id:'f', nombre:'Flor', color:'#e33', base:'b', modelo:'b6-vileplume-petalos'} ] },
+    { id:'wii-clicker', nombre:'Clicker Menú Wii', tipo:'combo', claves:'clicker wii nintendo menu canales mii homebrew', vistaAz:0.3, vistaEl:.75, fijos:['b6-wii-mii','b6-wii-tienda','b6-wii-homebrew'], descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+      desc:'El menú de Wii hecho clicker: cuatro canales, cada uno con su propio pulsador.',
+      bases:{ b:{nombre:'Menú Wii', modelo:'b6-wii-base'} }, figuras:[ {id:'menu', nombre:'Canales', color:'#0086d6', base:'b', modelo:'b6-wii-disco'} ] },
+    { id:'aceituno-mochopo', nombre:'Clicker Gato Aceituno (Mochopo)', tipo:'combo', claves:'clicker aceituno gato mochopo aceituna solidario benjamin', fijos:['b6-aceituno-cola'], tienda:'https://mochopo.com/producto/llavero-clicker-gato-aceituno-benjamin/', tiendaTexto:'Comprar en Mochopo (tienda solidaria) ›',
+      desc:'Aceituno, la mascota de Mochopo, asomando de su aceituna con la colita por detrás: la aceituna es la base y el gatito, la tecla. Diseño de Garder3D que se vende solo en la tienda solidaria de Mochopo.',
+      bases:{ b:{nombre:'Aceituna', modelo:'b6-aceituno-base'} }, figuras:[ {id:'a', nombre:'Aceituno', color:'#ff8040', base:'b', modelo:'b6-aceituno-aceituno'} ] },
+    { id:'tails-doll', nombre:'Tails Doll', tipo:'3d', modelo:'b6-tails-doll', claves:'figura sonic tails doll creepy',
+      desc:'Figura del inquietante Tails Doll de Sonic R.', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']] },
+    { id:'pokewalker-clicker', nombre:'Pokéwalker Clicker', tipo:'kit', claves:'clicker pokewalker pokemon pantallas caras podometro',
+      desc:'El Pokéwalker hecho clicker: la pantalla es la tecla. Elige entre más de 70 pantallas con caras de Pokémon.', descargas:[['MakerWorld','https://makerworld.com/es/models/2964216'],['Cults3D','https://cults3d.com/es/modelo-3d/juegos/pokewalker-clicker-pulsador-antiestres'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:[ {modelo:'pokewalker-base', nombre:'Pokéwalker'} ], grupos:['pw-t1','pw-t2'] },
+    { id:'digivice-clicker', nombre:'Digivice Clicker', tipo:'kit', claves:'clicker digivice digimon llavero pantallas sprites',
+      desc:'Llavero clicker de Digivice: la pantalla redonda es la tecla. Elige el sprite de Digimon.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/llavero-digivice-fidget-clicker-digimon'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:[ {modelo:'digivice-base', nombre:'Digivice'} ], grupos:['digi'] },
+    { id:'psyduck', nombre:'Psyduck Clicker', tipo:'combo', tienda:'https://thecraftyteckel.com/product/clicker-psyduck-pokemon', claves:'clicker pokemon psyduck flotador verano summer',
+      desc:'Psyduck de verano con su flotador: el flotador es la base y Psyduck, la tecla. Esculpido a mano en Nomad Sculpt.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/summer-psyduck-clicker-figure-pokemon'],['Patreon','https://www.patreon.com/cw/Garder3D']],
+      bases:{ f:{nombre:'Flotador', modelo:'b6-psyduck-base'} }, figuras:[ {id:'p', nombre:'Psyduck', base:'f', modelo:'b6-psyduck-psyduck'} ] },
+  ]},
+  'resina':  { titulo:'Resina',  tag:'Resina',  logo:'logo_teckel', halo:'#e4ebcf', vacio:'💧', fotos:'fotos-resina.js',  items: window.TIENDA.resina },
+  'crochet': { titulo:'Crochet', tag:'Crochet', logo:'logo_teckel', halo:'#f6e3e8', vacio:'🧶', fotos:'fotos-crochet.js', items: window.TIENDA.crochet },
+};
+/* ================================================================ */
+
+
+const $ = id => document.getElementById(id);
+const views = { home:$('home'), lista:$('lista'), visor:$('visor') };
+const scrollLista = {};   // posición guardada de cada listado
+function show(v, y = 0){ for (const k in views) views[k].classList.toggle('on', k===v); window.scrollTo(0, y); }
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go]'); if (!b) return;
+  location.hash = b.dataset.go ? '#'+b.dataset.go : '#inicio';
+});
+
+$('fsBtn').onclick = async () => {
+  try { document.fullscreenElement ? await document.exitFullscreen() : await document.documentElement.requestFullscreen(); }
+  catch { $('fsBtn').textContent = 'Pantalla completa no disponible aquí'; }
+};
+
+/* ---------- utilidades ---------- */
+const norm = s => (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const ordenados = key => [...SECCIONES[key].items].sort((a,b) => a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'}));
+const imgCache = {};
+const num = p => parseFloat(String(p).replace(',', '.'));
+function precioFicha(it){
+  const ps = it.variantes.map(v => num(v.precio)), mn = Math.min(...ps);
+  const txt = it.variantes.find(v => num(v.precio) === mn).precio;
+  return (new Set(ps).size > 1 ? 'desde ' : '') + txt;
+}
+const fotosCargadas = {};
+async function cargaFotos(key){
+  const s = SECCIONES[key]; if (!s.fotos || fotosCargadas[key]) return;
+  fotosCargadas[key] = new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = s.fotos; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+  return fotosCargadas[key];
+}
+const fotoDe = it => (it.tipo === '3d' || it.tipo === 'kit' || it.tipo === 'pikmin' || it.tipo === 'combo') ? A['thumb_'+it.id] : (window.FOTOS||{})[it.variantes[0].foto];
+function pinta(canvas, src, max=420, caja=false){  // las imágenes se dibujan en canvas: sin "guardar imagen"
+  const draw = im => {
+    if (caja) {                                     // ajusta la imagen centrada dentro del hueco del canvas
+      const dpr = Math.min(devicePixelRatio || 1, 2), W = Math.max(1, canvas.clientWidth * dpr), H = Math.max(1, canvas.clientHeight * dpr);
+      canvas.width = W; canvas.height = H;
+      const r = Math.min(W / im.width, H / im.height), w = im.width * r, hh = im.height * r;
+      const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, W, H); ctx.drawImage(im, (W - w) / 2, (H - hh) / 2, w, hh);
+      return;
+    }
+    const r = Math.min(1, max/Math.max(im.width, im.height));
+    canvas.width = im.width*r; canvas.height = im.height*r;
+    canvas.getContext('2d').drawImage(im, 0, 0, canvas.width, canvas.height); };
+  if (imgCache[src]) return draw(imgCache[src]);
+  const im = new Image(); im.onload = () => { imgCache[src] = im; draw(im); }; im.src = src;
+}
+
+/* ---------- listados ---------- */
+let listaKey = null;
+function renderLista(key){
+  const s = SECCIONES[key];
+  if (listaKey !== key) { $('buscar').value = ''; listaKey = key; scrollLista[key] = 0; }
+  $('listaTitulo').textContent = s.titulo; pinta($('listaLogo'), A[s.logo], 120);
+  $('buscar').placeholder = 'Buscar en ' + s.titulo.toLowerCase() + '…';
+  show('lista');
+  pintaGrid();
+  const y = scrollLista[key] || 0;   // volver a donde estaba
+  requestAnimationFrame(() => window.scrollTo(0, y));
+  if (s.fotos && !window.FOTOS_OK?.[key]) cargaFotos(key).then(() => { (window.FOTOS_OK ||= {})[key] = 1; if (listaKey === key) pintaGrid(); });
+}
+function pintaGrid(){
+  const key = listaKey, s = SECCIONES[key], q = norm($('buscar').value.trim());
+  $('limpiar').hidden = !q;
+  const items = ordenados(key).filter(it => !q || norm(it.nombre + ' ' + (it.desc||'') + ' ' + (it.variantes||[]).map(v => v.nombre + ' ' + v.desc).join(' ') + ' ' + (Array.isArray(it.bases) ? it.bases : Object.values(it.bases || {})).map(b => b.nombre).join(' ') + (it.tipo === 'kit' && !it.claves ? ' n-gotchi ngotchi clicker tamagotchi' : '') + (it.figuras ? ' ' + it.figuras.map(f => f.nombre).join(' ') + (it.tipo === 'pikmin' ? ' clicker halloween navidad calabaza regalo maceta' : '') : '') + ' ' + (it.claves || '')).includes(q));
+  const g = $('grid'); g.innerHTML = '';
+  const vacioTotal = s.items.length === 0;
+  $('vacio').hidden = items.length > 0;
+  $('vacio').querySelector('.big').textContent = vacioTotal ? (s.vacio || '✨') : '🔍';
+  $('vacioTxt').textContent = vacioTotal ? 'Muy pronto verás aquí los productos.' : 'No hay nada que coincida con «' + $('buscar').value.trim() + '».';
+  $('contador').textContent = s.items.length ? (q ? items.length + ' de ' + s.items.length : s.items.length + (s.items.length===1?' producto':' productos')) : '';
+  for (const it of items) {
+    const b = document.createElement('button');
+    b.className = 'item'; b.style.setProperty('--halo', s.halo);
+    b.innerHTML = `<div class="pic"><canvas></canvas></div><b></b><div class="meta"><small></small><em></em></div>`;
+    const src = fotoDe(it); if (src) requestAnimationFrame(() => pinta(b.querySelector('canvas'), src, 0, true));
+    if (it.tipo==='3d' || it.tipo==='kit' || it.tipo==='pikmin' || it.tipo==='combo') b.querySelector('.pic').insertAdjacentHTML('beforeend','<span class="badge3d">3D</span>');
+    else if (it.variantes.length > 1) b.querySelector('.pic').insertAdjacentHTML('beforeend',`<span class="vcount">${it.variantes.length} variantes</span>`);
+    b.querySelector('b').textContent = it.nombre;
+    b.querySelector('small').textContent = (it.tipo==='kit' || it.tipo==='pikmin' || (it.tipo==='combo' && it.figuras.length > 1)) ? 'Personalízalo en 3D' : (it.tipo==='3d' || it.tipo==='combo') ? 'Toca para verlo en 3D' : (it.variantes.length > 1 ? 'Elige variante' : 'Toca para verlo');
+    if (it.tipo === 'foto') b.querySelector('em').textContent = precioFicha(it);
+    b.onclick = () => { scrollLista[key] = window.scrollY; location.hash = '#'+key+'--'+it.id; };
+    g.appendChild(b);
+  }
+}
+$('buscar').addEventListener('input', pintaGrid);
+$('limpiar').onclick = () => { $('buscar').value = ''; pintaGrid(); $('buscar').focus(); };
+
+/* ---------- visor 3D (un único renderer reutilizado) ---------- */
+let renderer, scene, camera, controls, current, shadow, idle, anim = null;
+const cache = {};
+function init3D(){
+  if (renderer) return;
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  $('stage').prepend(renderer.domElement);
+  scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(2,4,3); scene.add(sun);
+  camera = new THREE.PerspectiveCamera(32, 1, 0.01, 5000);
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.enablePan = false; controls.autoRotateSpeed = 2.2;
+  controls.addEventListener('start', () => { anim = null; controls.autoRotate = false; clearTimeout(idle); $('hint').style.opacity = 0; });
+  controls.addEventListener('end', () => { if (!kitFoco) idle = setTimeout(() => controls.autoRotate = true, 3000); });
+  shadow = new THREE.Mesh(new THREE.CircleGeometry(1,48), new THREE.MeshBasicMaterial({ color:0x2b2433, transparent:true, opacity:.08, depthWrite:false }));
+  shadow.rotation.x = -Math.PI/2; scene.add(shadow);
+  new ResizeObserver(resize).observe($('stage')); resize();
+  renderer.setAnimationLoop(() => {
+    if (!(views.visor.classList.contains('on') && current)) return;
+    if (anim) {
+      const t = Math.min(1, (performance.now() - anim.t0) / anim.dur), e = t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+      camera.position.lerpVectors(anim.p0, anim.p1, e); controls.target.lerpVectors(anim.c0, anim.c1, e);
+      if (t >= 1) anim = null;
+    }
+    controls.update(); renderer.render(scene, camera);
+  });
+}
+function resize(){
+  const st = $('stage'), w = st.clientWidth, h = st.clientHeight; if (!w || !h) return;
+  renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+function loadScript(src){
+  return new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+}
+async function getModel(id){
+  if (cache[id]) return cache[id];
+  if (!(window.__m && window.__m[id])) await loadScript('modelo-'+id+'.js');
+  const buf = Uint8Array.from(atob(window.__m[id]), c => c.charCodeAt(0));
+  delete window.__m[id];
+  const key = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(K() + id)));
+  for (let i = 0; i < buf.length; i++) buf[i] ^= key[i & 31];
+  const bin = buf.buffer;
+  const g = await new Promise((ok, ko) => new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parse(bin, '', ok, ko));
+  g.scene.traverse(o => { if (o.isMesh) { if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals(); o.material.side = THREE.DoubleSide; } });
+  return cache[id] = g.scene;
+}
+let token = 0;
+async function show3D(id){
+  init3D(); resize();
+  const my = ++token; kitFoco = false; anim = null; $('focusBtn').hidden = true;
+  if (current) { scene.remove(current); current = null; }
+  $('loading').hidden = false; $('loading').textContent = 'Cargando modelo…';
+  try {
+    const obj = await getModel(id);
+    if (my !== token) return;
+    current = obj; scene.add(obj);
+    const box = new THREE.Box3().setFromObject(obj), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+    const R = size.length()/2;
+    shadow.scale.setScalar(Math.max(size.x, size.z)*.48); shadow.position.set(c.x, box.min.y+.01, c.z);
+    controls.target.copy(c);
+    const d = R / Math.sin(THREE.MathUtils.degToRad(16)) * 1.05;
+    camera.position.set(c.x + d*.3, c.y + d*.18, c.z + d*.94);
+    controls.minDistance = d*.45; controls.maxDistance = d*2.2;
+    controls.autoRotate = true; controls.update();
+    $('loading').hidden = true;
+  } catch(e) { if (my === token) $('loading').textContent = 'No se pudo cargar el modelo'; }
+}
+
+/* ---------- kits configurables (base + pantalla): gama N-Gotchi ---------- */
+let kitFoco = false, kitEstado = null, kitActual = null;
+const kitMem = {};
+const texCache = {};
+function texPantalla(pid){
+  if (texCache[pid]) return texCache[pid];
+  const t = new THREE.TextureLoader().load(window.NG.tex[pid]);
+  t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  return texCache[pid] = t;
+}
+function moverCamara(pos, target, dur=700){
+  anim = { p0: camera.position.clone(), p1: pos, c0: controls.target.clone(), c1: target, t0: performance.now(), dur };
+}
+const SALIENTE = 1.2;   // mm que la tecla sobresale del borde de la carcasa
+const datosBase = () => window.NG.bases[kitEstado.base];
+const plantillaId = () => window.NG.grupos[kitEstado.grupo].plantilla || 'eva-plantilla';
+const plantillaKit = () => (window.NG.plantillas || {})[plantillaId()] || window.NG.plantilla;
+function vistaGeneral(){
+  const box = new THREE.Box3().setFromObject(current), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  const d = size.length()/2 / Math.sin(THREE.MathUtils.degToRad(16));
+  kitFoco = false; controls.autoRotate = true;
+  moverCamara(new THREE.Vector3(c.x + d*.35, c.y + d*.12, c.z + d*.93), c);
+  $('focusBtn').textContent = '🔍 Ver la pantalla';
+}
+function vistaPantalla(){
+  const b = datosBase(), [hx, hy] = b.hueco, top = (b.rimZ ?? b.huecoTop) + (b.saliente ?? SALIENTE);
+  kitFoco = true; controls.autoRotate = false; clearTimeout(idle); $('hint').style.opacity = 0;
+  moverCamara(new THREE.Vector3(hx + 8, hy + 12, top + 80), new THREE.Vector3(hx, hy, top));
+  $('focusBtn').textContent = '↩︎ Ver entero';
+}
+function pintaTira(it){
+  const g = window.NG.grupos[kitEstado.grupo];
+  $('kitPantallas').innerHTML = '';
+  g.ids.forEach((pid, j) => {
+    const b = document.createElement('button'); b.className = 'scr' + (pid === kitEstado.pant ? ' on' : ''); b.setAttribute('aria-label', g.nombre + ' ' + (j+1));
+    b.innerHTML = '<canvas></canvas>'; pinta(b.firstChild, window.NG.thumbs[pid], 128);
+    b.onclick = () => { kitEstado.pant = pid; [...$('kitPantallas').children].forEach(x => x.classList.toggle('on', x === b)); ponPantalla(); vistaPantalla(); etiquetaPantalla(); };
+    $('kitPantallas').appendChild(b);
+  });
+  etiquetaPantalla();
+}
+function etiquetaPantalla(){
+  const g = window.NG.grupos[kitEstado.grupo], j = g.ids.indexOf(kitEstado.pant);
+  $('kitPLabel').textContent = 'Pantallas · ' + g.nombre + (j >= 0 ? ' · ' + (j+1) + ' de ' + g.ids.length : ' · ' + g.ids.length);
+}
+async function showKit(it){
+  init3D(); resize();
+  const my = ++token;
+  if (current) { scene.remove(current); current = null; }
+  $('loading').hidden = false; $('loading').textContent = 'Cargando modelo…';
+  try {
+    if (!window.NG) await loadScript('ngotchi-datos.js');
+    if (my !== token) return;
+    kitActual = it;
+    kitEstado = kitMem[it.id] = kitMem[it.id] || { base: it.bases[0].modelo, grupo: it.grupos[0], pant: window.NG.grupos[it.grupos[0]].ids[0] };
+    $('kitBox').hidden = false;
+    $('kitBases').innerHTML = '';
+    it.bases.forEach(bs => { const ch = document.createElement('button'); ch.className = 'chip' + (bs.modelo === kitEstado.base ? ' on' : ''); ch.textContent = bs.nombre;
+      ch.onclick = () => { kitEstado.base = bs.modelo; [...$('kitBases').children].forEach(x => x.classList.toggle('on', x === ch)); montaKit(false); }; $('kitBases').appendChild(ch); });
+    $('kitGrupos').innerHTML = ''; $('kitGrupos').hidden = it.grupos.length < 2;
+    it.grupos.forEach(gid => { const ch = document.createElement('button'); ch.className = 'chip' + (gid === kitEstado.grupo ? ' on' : '');
+      ch.textContent = window.NG.grupos[gid].nombre + ' (' + window.NG.grupos[gid].ids.length + ')';
+      ch.onclick = () => { kitEstado.grupo = gid; [...$('kitGrupos').children].forEach(x => x.classList.toggle('on', x === ch)); pintaTira(it); $('kitPantallas').scrollLeft = 0; }; $('kitGrupos').appendChild(ch); });
+    pintaTira(it);
+    $('focusBtn').hidden = false;
+    $('focusBtn').onclick = () => kitFoco ? vistaGeneral() : vistaPantalla();
+    await montaKit(true, my);
+  } catch(e) { console.error(e); if (my === token) $('loading').textContent = 'No se pudo cargar el modelo'; }
+}
+let kitGrupo = null, kitPantalla = null;
+function ponPantalla(){
+  if (!kitPantalla) return;
+  const b = datosBase(), sz = plantillaKit().size;
+  kitPantalla.position.set(b.hueco[0], b.hueco[1], (b.rimZ ?? b.huecoTop) + (b.saliente ?? SALIENTE) - sz[2]/2);
+  const map = texPantalla(kitEstado.pant);
+  kitPantalla.traverse(o => { if (o.isMesh) { o.material.map = map; o.material.color.set(0xffffff); o.material.needsUpdate = true; } });
+}
+async function montaKit(primera, my = token){
+  $('loading').hidden = false;
+  const pid = plantillaId();
+  const [base, plant] = await Promise.all([getModel(kitEstado.base), getModel(pid)]);
+  if (my !== token) return;
+  if (!kitGrupo) kitGrupo = new THREE.Group();
+  kitGrupo.clear();
+  if (kitPantalla && kitPantalla.userData.pid !== pid) kitPantalla = null;
+  if (!kitPantalla) { kitPantalla = plant.clone(true); kitPantalla.rotation.y = Math.PI; kitPantalla.userData.pid = pid;
+    kitPantalla.traverse(o => { if (o.isMesh) o.material = o.material.clone(); }); }
+  kitGrupo.add(base, kitPantalla); ponPantalla();
+  if (current !== kitGrupo) { if (current) scene.remove(current); current = kitGrupo; scene.add(kitGrupo); }
+  const box = new THREE.Box3().setFromObject(kitGrupo), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  shadow.scale.setScalar(Math.max(size.x, size.z)*.55); shadow.position.set(c.x, box.min.y + .01, c.z);
+  controls.minDistance = 25; controls.maxDistance = size.length()*4;
+  if (primera) { const d = size.length()/2 / Math.sin(THREE.MathUtils.degToRad(16));
+    controls.target.copy(c); camera.position.set(c.x + d*.35, c.y + d*.12, c.z + d*.93); controls.autoRotate = true; kitFoco = false; controls.update();
+    $('focusBtn').textContent = '🔍 Ver la pantalla'; }
+  else if (kitFoco) vistaPantalla(); else vistaGeneral();
+  $('loading').hidden = true;
+}
+
+/* ---------- descargas oficiales ---------- */
+function ponDescargas(lista){
+  const box = $('vDescargas'); box.innerHTML = '';
+  $('vDesc2').hidden = !(lista && lista.length);
+  (lista || []).forEach(([plat, url]) => { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = plat + ' ↗'; box.appendChild(a); });
+}
+
+/* ---------- Pikmin Clicker: figura (tecla) sobre base ---------- */
+const PK_SALIENTE = 0.8, PK_CUPULA = -1.5;   // mm: tapón plano asoma del borde; la cúpula se asienta en la boca
+let pkGrupo = null; const pkMem = {};
+async function showPikmin(it){
+  init3D(); resize();
+  const my = ++token; kitFoco = false; anim = null; $('focusBtn').hidden = true;
+  if (current) { scene.remove(current); current = null; }
+  const st = pkMem[it.id] = pkMem[it.id] || { fig: it.figuras[0].id };
+  $('pkBox').hidden = false; $('pkChips').innerHTML = '';
+  $('pkLabel').textContent = it.etiqueta || 'Pikmin'; $('pkLabel').hidden = $('pkChips').hidden = it.figuras.length < 2;
+  it.figuras.forEach(f => { const ch = document.createElement('button'); ch.className = 'chip' + (f.id === st.fig ? ' on' : '');
+    if (f.color) ch.innerHTML = `<span class="dot" style="background:${f.color}"></span>`; ch.append(f.nombre);
+    ch.onclick = () => { st.fig = f.id; [...$('pkChips').children].forEach(x => x.classList.toggle('on', x === ch)); montaPikmin(it, false); };
+    $('pkChips').appendChild(ch); });
+  await montaPikmin(it, true, my);
+}
+async function montaPikmin(it, primera, my = token){
+  const st = pkMem[it.id], f = it.figuras.find(x => x.id === st.fig), bdat = f.base ? it.bases[f.base] : null;
+  $('pkBase').textContent = bdat ? 'Base: ' + bdat.nombre : ''; $('pkBase').hidden = !bdat;
+  ponDescargas(f.descargas || it.descargas);
+  const tienda = f.tienda || it.tienda; $('vShop').hidden = !tienda; if (tienda) { $('vShop').href = tienda; $('vShop').textContent = f.tiendaTexto || it.tiendaTexto || 'Ver en la tienda ›'; }
+  $('loading').hidden = false; $('loading').textContent = 'Cargando modelo…';
+  try {
+    const [base, fig] = await Promise.all([bdat ? getModel(bdat.modelo || 'pk-base-' + f.base) : null, getModel(f.modelo || 'pk-fig-' + f.id)]);
+    if (my !== token) return;
+    if (!pkGrupo) pkGrupo = new THREE.Group();
+    const cambioBase = !base || !pkGrupo.children.includes(base);
+    pkGrupo.clear();
+    fig.position.set(0, (bdat && bdat.y != null) ? bdat.y + (f.cupula ? PK_CUPULA : PK_SALIENTE) : 0, 0);
+    if (base) pkGrupo.add(base); pkGrupo.add(fig);
+    if (it.fijos) for (const m of await Promise.all(it.fijos.map(getModel))) { m.position.set(0, 0, 0); pkGrupo.add(m); }
+    if (current !== pkGrupo) { if (current) scene.remove(current); current = pkGrupo; scene.add(pkGrupo); }
+    const box = new THREE.Box3().setFromObject(pkGrupo), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+    shadow.scale.setScalar(Math.max(size.x, size.z)*.55); shadow.position.set(c.x, box.min.y + .01, c.z);
+    const d = size.length()/2 / Math.sin(THREE.MathUtils.degToRad(16)) * 1.22;
+    controls.minDistance = d*.4; controls.maxDistance = d*2.5;
+    const az = it.vistaAz ?? 0.31, el = it.vistaEl ?? .2, pos = new THREE.Vector3(c.x + d*Math.sin(az)*.97, c.y + d*el, c.z + d*Math.cos(az)*.97);
+    if (primera) { controls.target.copy(c); camera.position.copy(pos); controls.autoRotate = true; controls.update(); }
+    else if (cambioBase) moverCamara(pos, c);
+    else { controls.target.copy(c); }
+    $('loading').hidden = true;
+  } catch(e) { console.error(e); if (my === token) $('loading').textContent = 'No se pudo cargar el modelo'; }
+}
+
+/* ---------- detalle ---------- */
+function renderDetalle(key, id){
+  const s = SECCIONES[key], lista = ordenados(key), i = lista.findIndex(x => x.id === id), it = lista[i];
+  if (!it) return renderLista(key);
+  show('visor');
+  $('visorSeccion').textContent = s.titulo; pinta($('visorLogo'), A[s.logo], 120);
+  $('volver').onclick = () => location.hash = '#'+key;
+  $('vTag').textContent = s.tag; $('vTag').style.background = key==='impresion-3d' ? 'var(--g3d)' : 'var(--tkgreen)';
+  $('vNombre').textContent = it.nombre; $('vDesc').textContent = it.desc || '';
+  $('vPrecio').hidden = $('vVarBox').hidden = $('vShop').hidden = true;
+  $('vColores').innerHTML = it.colores ? it.colores.map(c => `<span style="background:${c}"></span>`).join('') + `<em>${it.colores.length} ${it.colores.length===1?'color':'colores'}</em>` : '';
+  const n = lista.length;
+  $('prev').hidden = $('next').hidden = n < 2;
+  $('prev').onclick = () => location.hash = '#'+key+'--'+lista[(i-1+n)%n].id;
+  $('next').onclick = () => location.hash = '#'+key+'--'+lista[(i+1)%n].id;
+  const is3d = it.tipo === '3d' || it.tipo === 'kit' || it.tipo === 'pikmin' || it.tipo === 'combo';
+  $('kitBox').hidden = true; $('pkBox').hidden = true; $('focusBtn').hidden = true;
+  if (it.tienda) { $('vShop').hidden = false; $('vShop').href = it.tienda; $('vShop').textContent = it.tiendaTexto || 'Ver en la tienda ›'; }
+  ponDescargas(it.descargas);
+  $('stage').hidden = !is3d; $('photo').hidden = is3d;
+  $('stage').querySelector('.halo').style.background = `radial-gradient(circle, ${s.halo} 0, transparent 70%)`;
+  if (it.tipo === '3d' && it.modelo) { show3D(it.modelo); } else if (it.tipo === 'kit') showKit(it); else if (it.tipo === 'pikmin' || it.tipo === 'combo') showPikmin(it); else if (is3d) show3D(it.id);
+  else {
+    $('photo').prepend($('prev')); $('photo').appendChild($('next'));
+    const ponVariante = vi => {
+      const v = it.variantes[vi];
+      const src = (window.FOTOS||{})[v.foto]; const c = $('photoImg');
+      if (src) requestAnimationFrame(() => pinta(c, src, 0, true)); else { c.width = c.height = 1; cargaFotos(key).then(() => { if (location.hash.endsWith('--'+it.id)) ponVariante(vi); }); }
+      $('vPrecio').hidden = false; $('vPrecio').textContent = v.precio;
+      $('vDesc').textContent = v.desc || '';
+      $('vShop').hidden = !v.url; if (v.url) $('vShop').href = v.url;
+      [...$('vChips').children].forEach((ch, j) => ch.classList.toggle('on', j === vi));
+    };
+    $('vChips').innerHTML = '';
+    if (it.variantes.length > 1) {
+      $('vVarBox').hidden = false; $('vVarLabel').textContent = it.variantes.length + ' variantes';
+      it.variantes.forEach((v, j) => { const ch = document.createElement('button'); ch.className = 'chip'; ch.textContent = v.nombre; ch.onclick = () => ponVariante(j); $('vChips').appendChild(ch); });
+    }
+    ponVariante(0);
+  }
+  if (is3d && $('prev').parentNode !== $('stage')) { $('stage').append($('prev'), $('next')); }
+}
+
+/* ---------- rutas por #hash ---------- */
+function route(){
+  const h = location.hash.slice(1);
+  if (SECCIONES[h]) return renderLista(h);
+  const m = h.match(/^([a-z0-9-]+?)--([a-z0-9-]+)$/);
+  if (m && SECCIONES[m[1]]) return renderDetalle(m[1], m[2]);
+  show('home');
+}
+pinta($('logoG3'), A.logo_garder3d, 360); pinta($('logoTk'), A.logo_teckel, 360);
+addEventListener('hashchange', route); route();
+
+/* ---------- sin descargas: clic derecho, arrastrar, guardar ---------- */
+addEventListener('contextmenu', e => e.preventDefault());
+addEventListener('dragstart', e => e.preventDefault());
+addEventListener('selectstart', e => { if (!e.target.closest || !e.target.closest('input')) e.preventDefault(); });
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && (k === 's' || k === 'p' || k === 'u')) e.preventDefault();
+});
+</script>
+</body>
+</html>
