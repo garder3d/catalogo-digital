@@ -481,6 +481,7 @@ $('limpiar').onclick = () => { $('buscar').value = ''; pintaGrid(); $('buscar').
 
 /* ---------- visor 3D (un único renderer reutilizado) ---------- */
 let renderer, scene, camera, controls, current, shadow, idle, anim = null;
+function rotarLuego(){ controls.autoRotate = false; clearTimeout(idle); idle = setTimeout(() => { if (!kitFoco) controls.autoRotate = true; }, 4000); }
 const cache = {};
 function init3D(){
   if (renderer) return;
@@ -546,7 +547,7 @@ async function show3D(id){
     const d = R / Math.sin(THREE.MathUtils.degToRad(16)) * 1.05;
     camera.position.set(c.x + d*.3, c.y + d*.18, c.z + d*.94);
     controls.minDistance = d*.45; controls.maxDistance = d*2.2;
-    controls.autoRotate = true; controls.update();
+    rotarLuego(); controls.update();
     $('loading').hidden = true;
   } catch(e) { if (my === token) $('loading').textContent = 'No se pudo cargar el modelo'; }
 }
@@ -655,7 +656,7 @@ async function montaKit(primera, my = token){
   shadow.scale.setScalar(Math.max(size.x, size.z)*.55); shadow.position.set(c.x, box.min.y + .01, c.z);
   controls.minDistance = 25; controls.maxDistance = size.length()*4;
   if (primera) { const d = size.length()/2 / Math.sin(THREE.MathUtils.degToRad(16));
-    controls.target.copy(c); camera.position.set(c.x + d*.35, c.y + d*.12, c.z + d*.93); controls.autoRotate = true; kitFoco = false; controls.update();
+    controls.target.copy(c); camera.position.set(c.x + d*.35, c.y + d*.12, c.z + d*.93); kitFoco = false; rotarLuego(); controls.update();
     $('focusBtn').textContent = '🔍 Ver la pantalla'; }
   else if (kitFoco) vistaPantalla(); else vistaGeneral();
   $('loading').hidden = true;
@@ -705,7 +706,7 @@ async function montaPikmin(it, primera, my = token){
     const d = size.length()/2 / Math.sin(THREE.MathUtils.degToRad(16)) * 1.22;
     controls.minDistance = d*.4; controls.maxDistance = d*2.5;
     const az = it.vistaAz ?? 0.31, el = it.vistaEl ?? .2, pos = new THREE.Vector3(c.x + d*Math.sin(az)*.97, c.y + d*el, c.z + d*Math.cos(az)*.97);
-    if (primera) { controls.target.copy(c); camera.position.copy(pos); controls.autoRotate = true; controls.update(); }
+    if (primera) { controls.target.copy(c); camera.position.copy(pos); rotarLuego(); controls.update(); }
     else if (cambioBase) moverCamara(pos, c);
     else { controls.target.copy(c); }
     $('loading').hidden = true;
