@@ -23,7 +23,21 @@
   .search svg{width:20px;height:20px;color:var(--soft);flex:none}
   .search input{flex:1;border:0;background:none;font:inherit;font-size:1rem;padding:13px 0;outline:none;color:var(--ink);min-width:0}
   .search .clear{font-size:1.2rem;color:var(--soft);width:28px;height:28px;border-radius:50%}
-  .count{max-width:1100px;width:100%;margin:8px auto 0;padding:0 20px;color:var(--soft);font-size:.85rem}
+  .count{max-width:1100px;width:100%;margin:8px auto 0;padding:0 20px;color:var(--soft);font-size:.85rem;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .sorpresa{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:12px 22px;border-radius:999px;background:var(--card);font-weight:600;font-size:1rem;
+    box-shadow:0 4px 16px rgba(43,36,51,.08);transition:transform .15s}
+  .sorpresa span{display:inline-block;transition:transform .5s}
+  .sorpresa:active{transform:scale(.96)} .sorpresa:hover span{transform:rotate(200deg)}
+  .sorpresa.mini{margin:0;padding:6px 12px;font-size:.82rem;box-shadow:0 2px 8px rgba(43,36,51,.08);color:var(--ink)}
+  .ruleta{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(43,36,51,.55);backdrop-filter:blur(4px);opacity:0;transition:opacity .25s}
+  .ruleta.on{opacity:1}
+  .rcard{width:min(78vw,300px);background:var(--card);border-radius:26px;padding:18px 18px 20px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);transform:scale(.9);transition:transform .25s}
+  .ruleta.on .rcard{transform:scale(1)}
+  .rcard canvas{width:100%;aspect-ratio:1;display:block;border-radius:18px;background:radial-gradient(circle at 50% 55%,#ffe9d6,transparent 70%)}
+  .rcard b{display:block;margin-top:12px;font-size:1.15rem;min-height:1.4em}
+  .rcard small{color:var(--soft)}
+  .rcard.gana{animation:gana .45s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes gana{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
   .item .pic canvas{position:relative;width:88%;height:88%;object-fit:contain}
   html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'Fredoka',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
   button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
@@ -163,12 +177,14 @@
       <span class="arrow">›</span>
     </button>
   </div>
+  <button class="sorpresa" id="sorpresaHome"><span>🎲</span> Sorpréndeme</button>
   <button class="fs" id="fsBtn">Pantalla completa</button>
   <div class="foot">hecho por @garder3d</div>
 </section>
 
 <!-- ============ LISTADOS ============ -->
 <div class="aviso3d" id="aviso3d" role="status" hidden><span class="ic">✨</span><p><b>Vista previa simplificada</b>Los modelos 3D de la web tienen menos detalle para que carguen rápido en cualquier móvil. Las piezas impresas se ven mucho mejor en persona.</p><button id="aviso3dX" aria-label="Cerrar aviso">×</button></div>
+<div class="ruleta" id="ruleta" hidden><div class="rcard"><canvas id="rCanvas"></canvas><b id="rNombre"></b><small id="rSec"></small></div></div>
 <section class="view" id="lista">
   <div class="bar"><button class="back" data-go="">‹</button><h2 id="listaTitulo"></h2><canvas id="listaLogo"></canvas></div>
   <div class="search"><label>
@@ -176,7 +192,7 @@
     <input id="buscar" type="text" placeholder="Buscar…" autocomplete="off" enterkeyhint="search">
     <button class="clear" id="limpiar" aria-label="Borrar búsqueda" hidden>×</button>
   </label></div>
-  <div class="count" id="contador"></div>
+  <div class="count"><span id="contador"></span><button class="sorpresa mini" id="sorpresaLista">🎲 Sorpréndeme</button></div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="vacio" hidden><div class="big">🧶</div><p id="vacioTxt">Muy pronto verás aquí los productos.</p></div>
 </section>
@@ -324,7 +340,7 @@ const SECCIONES = {
       bases:{ b:{nombre:'Plato y relleno', modelo:'b4-pikamburguesa-base'} }, figuras:[ {id:'p', nombre:'Pan', base:'b', modelo:'b4-pikamburguesa-pan'} ] },
     { id:'happy-hippo', nombre:'Happy Hippo Clicker', tipo:'combo', vistaAz:1.05, etiqueta:'Cabeza', tienda:'https://thecraftyteckel.com/product/clicker-happy-hippo-triple-pulsador-hocico-cabeza-trasero', claves:'clicker hipopotamo triple pulsador',
       desc:'Triple clicker: hocico, cabeza y trasero, cada uno con su pulsador. La cabeza tiene tres miradas.',
-      fijos:['b4-hippo-morro','b4-hippo-culo'], bases:{ b:{nombre:'Barro', modelo:'b4-hippo-base'} },
+      fijos:['b4-hippo-morro','b4-hippo-culo'], fijosTeclas:true, bases:{ b:{nombre:'Barro', modelo:'b4-hippo-base'} },
       figuras:[ {id:'medio3', nombre:'Ojos hacia arriba', base:'b', modelo:'b4-hippo-medio3'}, {id:'medio2', nombre:'Mirada perdida', base:'b', modelo:'b4-hippo-medio2'},
         {id:'medio1', nombre:'Ojos al hocico', base:'b', modelo:'b4-hippo-medio1'} ] },
     { id:'gamballina', nombre:'Gamballina', tipo:'3d', modelo:'b4-gamballina', tienda:'https://thecraftyteckel.com/product/llavero-gamballina-shricken', claves:'figura gamba gallina shricken meme',
@@ -371,13 +387,13 @@ const SECCIONES = {
     { id:'vileplume-clicker', nombre:'Vileplume Clicker', tipo:'combo', claves:'clicker pokemon vileplume flor', descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
       desc:'Vileplume: el cuerpo es la base y la gran flor, la tecla.',
       bases:{ b:{nombre:'Cuerpo', modelo:'b6-vileplume-base'} }, figuras:[ {id:'f', nombre:'Flor', color:'#e33', base:'b', modelo:'b6-vileplume-petalos'} ] },
-    { id:'wii-clicker', nombre:'Clicker Menú Wii', tipo:'combo', claves:'clicker wii nintendo menu canales mii homebrew', vistaAz:0.3, vistaEl:.75, fijos:['b6-wii-mii','b6-wii-tienda','b6-wii-homebrew'], descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
+    { id:'wii-clicker', nombre:'Clicker Menú Wii', tipo:'combo', claves:'clicker wii nintendo menu canales mii homebrew', vistaAz:0.3, vistaEl:.75, fijosTeclas:true, fijos:['b6-wii-mii','b6-wii-tienda','b6-wii-homebrew'], descargas:[['Patreon','https://www.patreon.com/cw/Garder3D']],
       desc:'El menú de Wii hecho clicker: cuatro canales, cada uno con su propio pulsador.',
       bases:{ b:{nombre:'Menú Wii', modelo:'b6-wii-base'} }, figuras:[ {id:'menu', nombre:'Canales', color:'#0086d6', base:'b', modelo:'b6-wii-disco'} ] },
     { id:'aceituno-mochopo', nombre:'Clicker Gato Aceituno (Mochopo)', tipo:'combo', claves:'clicker aceituno gato mochopo aceituna solidario benjamin', fijos:['b6-aceituno-cola'], tienda:'https://mochopo.com/producto/llavero-clicker-gato-aceituno-benjamin/', tiendaTexto:'Comprar en Mochopo (tienda solidaria) ›',
       desc:'Aceituno, la mascota de Mochopo, asomando de su aceituna con la colita por detrás: la aceituna es la base y el gatito, la tecla. Diseño de Garder3D que se vende solo en la tienda solidaria de Mochopo.',
       bases:{ b:{nombre:'Aceituna', modelo:'b6-aceituno-base'} }, figuras:[ {id:'a', nombre:'Aceituno', color:'#ff8040', base:'b', modelo:'b6-aceituno-aceituno'} ] },
-    { id:'fnf-clicker', nombre:"Clicker Friday Night Funkin'", tipo:'combo', vistaAz:0.25, claves:'clicker friday night funkin fnf boyfriend flechas ritmo',
+    { id:'fnf-clicker', nombre:"Clicker Friday Night Funkin'", tipo:'combo', vistaAz:0.25, fijosTeclas:true, pulsa:[0,0,-1], claves:'clicker friday night funkin fnf boyfriend flechas ritmo',
       desc:'Boyfriend con las cuatro flechas del juego, cada una con su propio pulsador: izquierda, abajo, arriba y derecha.', descargas:[['Cults3D','https://cults3d.com/es/modelo-3d/juegos/friday-night-funkin-boyfriend-clicker-pulsador-antiestres'],['Patreon','https://www.patreon.com/cw/Garder3D']],
       fijos:['b7-fnf-abajo','b7-fnf-arriba','b7-fnf-derecha'], bases:{ b:{nombre:'Boyfriend y cajas', modelo:'b7-fnf-base'} },
       figuras:[ {id:'f', nombre:'Flechas', base:'b', modelo:'b7-fnf-izquierda'} ] },
@@ -409,7 +425,7 @@ const SECCIONES = {
 const $ = id => document.getElementById(id);
 const views = { home:$('home'), lista:$('lista'), visor:$('visor') };
 const scrollLista = {};   // posición guardada de cada listado
-function show(v, y = 0){ for (const k in views) views[k].classList.toggle('on', k===v); window.scrollTo(0, y); }
+function show(v, y = 0){ for (const k in views) views[k].classList.toggle('on', k===v); window.scrollTo(0, y); if (v !== 'lista' && typeof cierraAviso === 'function') cierraAviso(); }
 
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-go]'); if (!b) return;
@@ -460,9 +476,37 @@ let avisado3D = false, avisoT = null;
 function avisa3D(){   // aviso breve, una vez por visita, al entrar en Impresión 3D
   if (avisado3D) return; avisado3D = true;
   const a = $('aviso3d'); a.hidden = false; requestAnimationFrame(() => a.classList.add('on'));
-  const cierra = () => { clearTimeout(avisoT); a.classList.remove('on'); setTimeout(() => a.hidden = true, 400); };
-  $('aviso3dX').onclick = cierra; avisoT = setTimeout(cierra, 7000);
+  $('aviso3dX').onclick = cierraAviso; avisoT = setTimeout(cierraAviso, 7000);
 }
+function cierraAviso(){ const a = $('aviso3d'); if (a.hidden) return; clearTimeout(avisoT); a.classList.remove('on'); setTimeout(() => a.hidden = true, 400); }
+function sorprende(keys){   // ruleta de miniaturas que frena y abre un producto al azar
+  const pool = keys.flatMap(k => SECCIONES[k].items.map(it => ({ k, it })));
+  if (!pool.length) return;
+  const con = pool.filter(x => fotoDe(x.it)), final = pool[Math.floor(Math.random() * pool.length)];
+  const total = 16, seq = [];
+  for (let i = 0; i < total; i++) seq.push(con.length ? con[Math.floor(Math.random() * con.length)] : final);
+  seq.push(final);
+  const carga = src => new Promise(ok => { if (!src) return ok(null); const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; });
+  const r = $('ruleta'), card = r.querySelector('.rcard'), cv = $('rCanvas');
+  r.hidden = false; card.classList.remove('gana'); requestAnimationFrame(() => r.classList.add('on'));
+  Promise.all(seq.map(x => carga(fotoDe(x.it)))).then(ims => {
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = cv.clientWidth * dpr, H = cv.clientHeight * dpr; cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d'); let n = 0;
+    const paso = () => {
+      const x = seq[n], im = ims[n]; ctx.clearRect(0, 0, W, H);
+      if (im) { const k = Math.min(W * .9 / im.width, H * .9 / im.height), w = im.width * k, h = im.height * k; ctx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); }
+      $('rNombre').textContent = x.it.nombre; $('rSec').textContent = SECCIONES[x.k].titulo;
+      if (n++ < total) setTimeout(paso, 45 + n * n * 1.1);
+      else { card.classList.add('gana'); try { navigator.vibrate && navigator.vibrate(20); } catch(e) {}
+        setTimeout(() => { r.classList.remove('on'); setTimeout(() => r.hidden = true, 250);
+          scrollLista[final.k] = final.k === listaKey ? window.scrollY : 0;
+          location.hash = '#' + final.k + '--' + final.it.id; }, 900); }
+    };
+    paso();
+  });
+}
+$('sorpresaHome').onclick = () => sorprende(Object.keys(SECCIONES));
+$('sorpresaLista').onclick = () => sorprende([listaKey]);
 function renderLista(key){
   const s = SECCIONES[key];
   if (listaKey !== key) { $('buscar').value = ''; listaKey = key; scrollLista[key] = 0; if (key === 'impresion-3d') avisa3D(); }
@@ -509,6 +553,53 @@ $('limpiar').onclick = () => { $('buscar').value = ''; pintaGrid(); $('buscar').
 let renderer, scene, camera, controls, current, shadow, idle, anim = null;
 function rotarLuego(){ controls.autoRotate = false; clearTimeout(idle); idle = setTimeout(() => { if (!kitFoco) controls.autoRotate = true; }, 4000); }
 const cache = {};
+/* ---------- teclas que se pulsan (clic con sonido) ---------- */
+let teclas = [], pulsada = null, ptr0 = null, actx = null;
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function ponTeclas(objs, dir, recorrido){
+  for (const t of teclas) suelta(t, true);
+  teclas = objs.filter(Boolean).map(o => ({ o, dir: new THREE.Vector3(...dir), rec: recorrido, cur: 0, obj: 0 }));
+  $('hint').textContent = teclas.length ? 'Toca la tecla para hacer clic · arrastra para girar' : 'Arrastra para girar · pellizca para acercar';
+  $('hint').style.opacity = 1;
+}
+const SON = { abajo:'data:audio/wav;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=', arriba:'data:audio/wav;base64,UklGRn4bAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAATElTVBoAAABJTkZPSVNGVA4AAABMYXZmNjAuMTYuMTAwAGRhdGE4GwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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9v8GAAMA9f/8//z/8f/5/wUAAgABAAgACgAGAP//+//+/wAA/v///wEAAQABAAAA/////wIAAgABAAEAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }, sonBuf = {};
+function cargaSon(){   // sonido real del clicker (grabado por Garder3D), decodificado una vez
+  if (sonBuf.ok) return sonBuf.ok;
+  return sonBuf.ok = Promise.all(Object.entries(SON).map(async ([k, url]) => {
+    const ab = Uint8Array.from(atob(url.split(',')[1]), c => c.charCodeAt(0)).buffer;
+    sonBuf[k] = await new Promise((ok, ko) => actx.decodeAudioData(ab, ok, ko));
+  }));
+}
+function clac(arriba){
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    cargaSon().then(() => {
+      const src = actx.createBufferSource(); src.buffer = sonBuf[arriba ? 'arriba' : 'abajo'];
+      src.playbackRate.value = 0.96 + Math.random() * 0.08;   // pequeña variación para que no suene idéntico
+      src.connect(actx.destination); src.start();
+    }).catch(() => {});
+  } catch(e) {}
+}
+function teclaEn(ev){
+  if (!teclas.length) return null;
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set((ev.clientX - r.left) / r.width * 2 - 1, -(ev.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(teclas.map(t => t.o), true)[0];
+  if (!hit) return null;
+  return teclas.find(t => { let o = hit.object; while (o) { if (o === t.o) return true; o = o.parent; } return false; });
+}
+function suelta(t, mudo){ if (!t) return; t.obj = 0; if (!mudo) clac(true); if (pulsada === t) pulsada = null; }
+function animaTeclas(){
+  for (const t of teclas) {
+    if (t.obj === 0 && t.cur === 0) continue;
+    if (t.p0 === undefined || (t.cur === 0 && t.obj)) t.p0 = t.o.position.clone();
+    t.cur += (t.obj - t.cur) * .5; if (Math.abs(t.obj - t.cur) < .01) t.cur = t.obj;
+    t.o.position.copy(t.p0).addScaledVector(t.dir, t.cur);
+    if (t.cur === 0) t.p0 = undefined;
+  }
+}
 function init3D(){
   if (renderer) return;
   renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
@@ -526,6 +617,12 @@ function init3D(){
   controls.addEventListener('end', () => { if (!kitFoco) idle = setTimeout(() => controls.autoRotate = true, 3000); });
   shadow = new THREE.Mesh(new THREE.CircleGeometry(1,48), new THREE.MeshBasicMaterial({ color:0x2b2433, transparent:true, opacity:.08, depthWrite:false }));
   shadow.rotation.x = -Math.PI/2; scene.add(shadow);
+  const el = renderer.domElement;
+  el.addEventListener('pointerdown', ev => { const t = teclaEn(ev); if (!t) return; ptr0 = [ev.clientX, ev.clientY]; pulsada = t; t.obj = t.rec; clac(false);
+    try { navigator.vibrate && navigator.vibrate(12); } catch(e) {} });
+  el.addEventListener('pointermove', ev => { if (pulsada && ptr0 && Math.hypot(ev.clientX - ptr0[0], ev.clientY - ptr0[1]) > 10) suelta(pulsada, true); });
+  const fin = () => { if (pulsada) suelta(pulsada); ptr0 = null; };
+  el.addEventListener('pointerup', fin); el.addEventListener('pointercancel', () => { if (pulsada) suelta(pulsada, true); ptr0 = null; }); el.addEventListener('pointerleave', fin);
   new ResizeObserver(resize).observe($('stage')); resize();
   renderer.setAnimationLoop(() => {
     if (!(views.visor.classList.contains('on') && current)) return;
@@ -534,6 +631,7 @@ function init3D(){
       camera.position.lerpVectors(anim.p0, anim.p1, e); controls.target.lerpVectors(anim.c0, anim.c1, e);
       if (t >= 1) anim = null;
     }
+    animaTeclas();
     controls.update();
     const dist = camera.position.distanceTo(controls.target), nr = Math.max(0.05, dist * 0.02);   // plano cercano según la distancia: evita parpadeos en calcas finas
     if (Math.abs(nr - camera.near) > nr * 0.1) { camera.near = nr; camera.far = Math.max(5000, dist * 50); camera.updateProjectionMatrix(); }
@@ -568,7 +666,7 @@ async function show3D(id){
   try {
     const obj = await getModel(id);
     if (my !== token) return;
-    current = obj; scene.add(obj);
+    current = obj; scene.add(obj); ponTeclas([], [0,-1,0], 0);
     const box = new THREE.Box3().setFromObject(obj), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
     const R = size.length()/2;
     shadow.scale.setScalar(Math.max(size.x, size.z)*.48); shadow.position.set(c.x, box.min.y+.01, c.z);
@@ -701,6 +799,7 @@ async function montaKit(primera, my = token){
   if (!kitPantalla) { kitPantalla = plant.clone(true); kitPantalla.rotation.y = Math.PI; kitPantalla.userData.pid = pid;
     kitPantalla.traverse(o => { if (o.isMesh) o.material = o.material.clone(); }); }
   kitGrupo.add(base, kitPantalla); ponPantalla();
+  ponTeclas(kitActual && kitActual.etiquetaP ? [] : [kitPantalla], [0,0,-1], 1.6);
   if (current !== kitGrupo) { if (current) scene.remove(current); current = kitGrupo; scene.add(kitGrupo); }
   const box = new THREE.Box3().setFromObject(kitGrupo), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
   shadow.scale.setScalar(Math.max(size.x, size.z)*.55); shadow.position.set(c.x, box.min.y + .01, c.z);
@@ -749,7 +848,9 @@ async function montaPikmin(it, primera, my = token){
     pkGrupo.clear();
     fig.position.set(0, (bdat && bdat.y != null) ? bdat.y + (f.cupula ? PK_CUPULA : PK_SALIENTE) : 0, 0);
     if (base) pkGrupo.add(base); pkGrupo.add(fig);
-    if (it.fijos) for (const m of await Promise.all(it.fijos.map(getModel))) { m.position.set(0, 0, 0); pkGrupo.add(m); }
+    const fijos = it.fijos ? await Promise.all(it.fijos.map(getModel)) : [];
+    for (const m of fijos) { m.position.set(0, 0, 0); pkGrupo.add(m); }
+    ponTeclas(bdat ? [fig, ...(it.fijosTeclas ? fijos : [])] : [], it.pulsa || [0,-1,0], 2.4);
     if (current !== pkGrupo) { if (current) scene.remove(current); current = pkGrupo; scene.add(pkGrupo); }
     const box = new THREE.Box3().setFromObject(pkGrupo), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
     shadow.scale.setScalar(Math.max(size.x, size.z)*.55); shadow.position.set(c.x, box.min.y + .01, c.z);
