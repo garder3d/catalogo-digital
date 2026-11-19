@@ -482,7 +482,9 @@ function cierraAviso(){ const a = $('aviso3d'); if (a.hidden) return; clearTimeo
 function sorprende(keys){   // ruleta de miniaturas que frena y abre un producto al azar
   const pool = keys.flatMap(k => SECCIONES[k].items.map(it => ({ k, it })));
   if (!pool.length) return;
-  const con = pool.filter(x => fotoDe(x.it)), final = pool[Math.floor(Math.random() * pool.length)];
+  const conItems = keys.filter(k => SECCIONES[k].items.length);   // primero una sección al azar (todas igual de probables), luego un producto de ella
+  const kf = conItems[Math.floor(Math.random() * conItems.length)], deK = pool.filter(x => x.k === kf);
+  const con = pool.filter(x => fotoDe(x.it)), final = deK[Math.floor(Math.random() * deK.length)];
   const total = 16, seq = [];
   for (let i = 0; i < total; i++) seq.push(con.length ? con[Math.floor(Math.random() * con.length)] : final);
   seq.push(final);
